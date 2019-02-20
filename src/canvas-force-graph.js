@@ -63,7 +63,8 @@ export default Kapsule({
     onFinishLoading: { default: () => {}, triggerUpdate: false },
     onEngineTick: { default: () => {}, triggerUpdate: false },
     onEngineStop: { default: () => {}, triggerUpdate: false },
-    isShadow: { default: false, triggerUpdate: false }
+    isShadow: { default: false, triggerUpdate: false },
+    translateAnimation:{default: {enable: true}, triggerUpdate: false}
   },
 
   methods: {
@@ -118,6 +119,21 @@ export default Kapsule({
           if (state.nodeCanvasObject) {
             // Custom node paint
             state.nodeCanvasObject(node, state.ctx, state.globalScale);
+            return;
+          }
+
+
+          // /*平移动画*/
+          if (state.translateAnimation.enable) {
+            ctx.clearRect(0, 0, window.width, window.innerHeight)
+            // Draw wider nodes by 1px on shadow canvas for more precise hovering (due to boundary anti-aliasing)
+            const r = Math.sqrt(Math.max(0, getVal(node) || 1)) * state.nodeRelSize + padAmount;
+
+            node.x += 2
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
+            ctx.fillStyle = getColor(node) || 'rgba(31, 120, 180, 0.92)';
+            ctx.fill();
             return;
           }
 

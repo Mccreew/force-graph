@@ -23,6 +23,7 @@ const linkedProps = Object.assign(
     'nodeCanvasObject',
     'linkColor',
     'linkAutoColorBy',
+    'linkAutoColorBy',
     'linkWidth',
     'linkCanvasObject',
     'linkDirectionalArrowLength',
@@ -40,6 +41,7 @@ const linkedProps = Object.assign(
     'cooldownTicks',
     'cooldownTime',
     'onEngineTick',
+    'translateAnimation',
     'onEngineStop'
   ].map(p => ({ [p]: bindFG.linkProp(p)})),
   ...[
@@ -148,6 +150,8 @@ export default Kapsule({
     onLinkClick: { default: () => {}, triggerUpdate: false },
     onLinkRightClick: { triggerUpdate: false },
     onLinkHover: { default: () => {}, triggerUpdate: false },
+    /*平移动画*/
+    enableTranslateAnimation:{default: true, triggerUpdate: false},
     ...linkedProps
   },
 
@@ -393,6 +397,10 @@ export default Kapsule({
 
     // Handle click events on nodes/links
     container.addEventListener('click', ev => {
+      /*点击画布的时候，切换平移动画状态*/
+      state.translateAnimation.enable = !state.translateAnimation.enable
+      console.log(state.translateAnimation.enable)
+
       if (state.hoverObj) {
         state[`on${state.hoverObj.type}Click`](state.hoverObj.d);
       }
