@@ -1,41 +1,107 @@
 <head>
-    <style> body {
-        margin: 0;
-    } </style>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <style> body {
+    margin: 0;
+  } </style>
 
-    <!--<script src="//unpkg.com/force-graph"></script>-->
-    <script src="../../dist/force-graph.js"></script>
+  <!--<script src="//unpkg.com/force-graph"></script>-->
+  <script src="../../dist/force-graph.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
 <div id="graph"></div>
 
 <script>
-    // Random tree
-    const N = 300;
-    const gData = {
-        nodes: [...Array(N).keys()].map(i => ({id: i})),
-        links: [...Array(N).keys()]
-            .filter(id => id)
-            .map(id => ({
-                source: id,
-                target: Math.round(Math.random() * (id - 1))
-            }))
-    };
 
-    const Graph = ForceGraph()
-    (document.getElementById('graph'))
-        .linkDirectionalParticles(2)
-        .graphData(gData)
+  axios.get('http://localhost:8080/data/1').then(req => {
+  	let data = req.data
 
-    // gData.nodes.push({
-    //   id:989
-    // },{
-    //   id:1000
-    // })
-    // gData.links.push({
-    //   source:989,
-    //   target:1000
-    // })
+  })
+
+	// Random tree
+	const N = 300;
+	let gData = {
+		nodes: [...Array(N).keys()].map(i => ({id: i})),
+		links: [...Array(N).keys()]
+			.filter(id => id)
+			.map(id => ({
+				source: id,
+				target: Math.round(Math.random() * (id - 1))
+			}))
+	};
+
+	let nodesArray;
+	let linksArray;
+	const Graph = ForceGraph()
+	(document.getElementById('graph'))
+		// .linkDirectionalParticles(2)
+		.graphData(gData)
+		.feedData((count, graphData) => {
+				let factor = N * (count + 1);
+				nodesArray =  [...Array(N).keys()].map(n => ({
+					id: n + factor,
+					flag: 'new'
+				}))
+
+				linksArray = [...Array(N).keys()].map(n => n + factor)
+					.filter(id => id)
+					.map(id => ({
+						source: id,
+						target: Math.round(Math.random() * (id - factor) + factor)
+					}))
+
+      let newData = Object.assign({}, graphData)
+      newData.nodes.push(...nodesArray)
+			newData.links.push(...linksArray)
+
+
+			Graph.graphData(newData)
+
+		})
+    .refreshData((data)=>{
+    	console.log('refreshData: ', data)
+			try {
+				Graph.graphData(data)
+			} catch (e) {
+				console.log(e)
+			}
+    })
+		.onNodeClick(n => {
+			console.log(n)
+		})
+    .onEngineStop(() => {
+    	console.log('animation end')
+    });
+
+  //
+	// nodesArray = [...Array(N).keys()].map(n => ({
+	// 	id: n + 300,
+	// 	flag: 'new'
+	// }))
+	// linksArray = [...Array(N).keys()].map(n => n + 300)
+	// 	.filter(id => id)
+	// 	.map(id => ({
+	// 		source: id,
+	// 		target: Math.round(Math.random() * (id - 300) + 300)
+	// 	}))
+
+	// gData.nodes.push(...nodesArray)
+	// gData.links.push(...linksArray)
+
+	// gData.nodes.push({
+	// 	id: 1000,
+	// 	flag: 'sdf'
+	// }, {
+	// 	id: 2000,
+	// 	flag: 'sdf'
+	// })
+	// gData.links.push({
+	//   source:1000,
+	//   target:2000
+	// })
+
+	// Graph.graphData(gData)
+
 </script>
 </body>

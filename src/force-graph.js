@@ -42,6 +42,7 @@ const linkedProps = Object.assign(
     'cooldownTime',
     'onEngineTick',
     'translateAnimation',
+    'rightNode',
     'onEngineStop'
   ].map(p => ({ [p]: bindFG.linkProp(p)})),
   ...[
@@ -55,7 +56,9 @@ const linkedProps = Object.assign(
   ].map(p => ({ [p]: bindBoth.linkProp(p)}))
 );
 const linkedMethods = Object.assign(...[
-  'd3Force'
+  'd3Force',
+	'feedData',
+	'refreshData'
 ].map(p => ({ [p]: bindFG.linkMethod(p)})));
 
 function adjustCanvasSize(state) {
@@ -107,6 +110,18 @@ function clearCanvas(ctx, width, height) {
   ctx.restore();        //restore transforms
 }
 
+
+function getRightNode(state) {
+	let max = window.innerWidth / 2
+	let node
+	state.graphData.nodes.forEach(n => {
+		if (max < n.x) {
+			max = n.x
+			console.log('max: ', max)
+			state.rightNode.d = n
+		}
+	})
+}
 //
 
 export default Kapsule({
@@ -150,8 +165,7 @@ export default Kapsule({
     onLinkClick: { default: () => {}, triggerUpdate: false },
     onLinkRightClick: { triggerUpdate: false },
     onLinkHover: { default: () => {}, triggerUpdate: false },
-    /*平移动画*/
-    enableTranslateAnimation:{default: true, triggerUpdate: false},
+		// firstClick:{default:false, triggerUpdate: false},
     ...linkedProps
   },
 
@@ -347,8 +361,9 @@ export default Kapsule({
 
     state.zoom
       .filter(() => state.enableZoomPanInteraction ? !d3Event.button : false) // disable zoom interaction
-      .scaleExtent([0.01, 1000])
-      .on('zoom', function() {
+      .scaleExtent([0.5, 10])
+			// .translateExtent([null, [window.innerWidth + 20, window.innerHeight + 20]])
+      .on('zoom', function(d, i, self) {
         const t = d3ZoomTransform(this); // Same as d3.event.transform
         [ctx, shadowCtx].forEach(c => {
           resetTransform(c);
@@ -363,7 +378,8 @@ export default Kapsule({
       // re-zoom, if still in default position (not user modified)
       if (d3ZoomTransform(state.canvas).k === state.lastSetZoom) {
         state.zoom.scaleTo(state.zoom.__baseElem,
-          state.lastSetZoom = ZOOM2NODES_FACTOR / Math.cbrt(state.graphData.nodes.length)
+          // state.lastSetZoom = ZOOM2NODES_FACTOR / Math.cbrt(state.graphData.nodes.length)
+				2
         );
       }
     });
@@ -400,7 +416,8 @@ export default Kapsule({
       /*点击画布的时候，切换平移动画状态*/
       state.translateAnimation.enable = !state.translateAnimation.enable
       console.log(state.translateAnimation.enable)
-
+			// getRightNode(state)
+			
       if (state.hoverObj) {
         state[`on${state.hoverObj.type}Click`](state.hoverObj.d);
       }
@@ -480,6 +497,7 @@ export default Kapsule({
 
       state.animationFrameRequestId = requestAnimationFrame(animate);
     })();
+
   },
 
   update: function updateFn(state) {}
