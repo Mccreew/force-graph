@@ -6,102 +6,53 @@
 
   <!--<script src="//unpkg.com/force-graph"></script>-->
   <script src="../../dist/force-graph.js"></script>
-  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 
 <body>
 <div id="graph"></div>
 
 <script>
-
-  axios.get('http://localhost:8080/data/1').then(req => {
-  	let data = req.data
-
-  })
-
-	// Random tree
-	const N = 300;
-	let gData = {
-		nodes: [...Array(N).keys()].map(i => ({id: i})),
-		links: [...Array(N).keys()]
-			.filter(id => id)
-			.map(id => ({
-				source: id,
-				target: Math.round(Math.random() * (id - 1))
-			}))
-	};
-
-	let nodesArray;
-	let linksArray;
+  let count = 2
 	const Graph = ForceGraph()
 	(document.getElementById('graph'))
-		// .linkDirectionalParticles(2)
-		.graphData(gData)
-		.feedData((count, graphData) => {
-				let factor = N * (count + 1);
-				nodesArray =  [...Array(N).keys()].map(n => ({
-					id: n + factor,
-					flag: 'new'
-				}))
+	// .linkDirectionalParticles(2)
+		.feedData((graphData) => {
+      axios.get('http://localhost:8080/data/' + count).then(req => {
+      	req.data.nodes.forEach(n => {
+      		n.flag = 'new'
+        })
+        graphData.nodes.push(...req.data.nodes)
+        graphData.links.push(...req.data.links)
 
-				linksArray = [...Array(N).keys()].map(n => n + factor)
-					.filter(id => id)
-					.map(id => ({
-						source: id,
-						target: Math.round(Math.random() * (id - factor) + factor)
-					}))
-
-      let newData = Object.assign({}, graphData)
-      newData.nodes.push(...nodesArray)
-			newData.links.push(...linksArray)
-
-
-			Graph.graphData(newData)
-
+        count += 1
+        Graph.graphData(graphData)
+      })
 		})
-    .refreshData((data)=>{
-    	console.log('refreshData: ', data)
+		.refreshData((data) => {
+			console.log('refreshData: ', data)
 			try {
 				Graph.graphData(data)
 			} catch (e) {
 				console.log(e)
 			}
-    })
+		})
 		.onNodeClick(n => {
 			console.log(n)
 		})
-    .onEngineStop(() => {
-    	console.log('animation end')
+		.onEngineStop(() => {
+			console.log('animation end')
+		})
+    .onLinkClick(l => {
+    	console.log(l)
     });
 
-  //
-	// nodesArray = [...Array(N).keys()].map(n => ({
-	// 	id: n + 300,
-	// 	flag: 'new'
-	// }))
-	// linksArray = [...Array(N).keys()].map(n => n + 300)
-	// 	.filter(id => id)
-	// 	.map(id => ({
-	// 		source: id,
-	// 		target: Math.round(Math.random() * (id - 300) + 300)
-	// 	}))
+	axios.get('http://localhost:8080/data/1').then(req => {
+		let data = req.data
 
-	// gData.nodes.push(...nodesArray)
-	// gData.links.push(...linksArray)
+    // console.log('req.data: ', data)
+		Graph.graphData(data)
+	})
 
-	// gData.nodes.push({
-	// 	id: 1000,
-	// 	flag: 'sdf'
-	// }, {
-	// 	id: 2000,
-	// 	flag: 'sdf'
-	// })
-	// gData.links.push({
-	//   source:1000,
-	//   target:2000
-	// })
-
-	// Graph.graphData(gData)
 
 </script>
 </body>

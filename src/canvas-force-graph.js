@@ -21,14 +21,35 @@ const DAG_LEVEL_NODE_RATIO = 2;
 
 function removeNode(node, state) {
 	let {nodes, links} = state.graphData
-	links = links.filter(l => l.source !== node && l.target !== node); // Remove links attached to node
-	nodes.splice(node.id, 1); // Remove node
+	// console.log('delete node: ', node)
+	// links = links.filter(l => l.source.id !== node.id && l.target.id !== node.id); // Remove links attached to node
+	links.forEach((l, idx) => {
+			if (l.source === node || l.target === node) {
+				links.splice(idx, 1)
+				// console.log('delete link: ', l)
+			}
+		}
+	)
+	nodes.splice(node.id, 1)
 	nodes.forEach((n, idx) => {
 		n.id = idx;
 	});
-	console.log('state.links: ', links)
-	state.refreshData({nodes, links})
+	console.log('{nodes, links}: ', {nodes, links})
+	// state.refreshData({nodes, links})
 }
+
+
+// const myWorker = new Worker('/home/jw/WebstormProjects/force-graph/src/worker.js')
+
+function clearOutNode(state) {
+	let {nodes, links} = state.graphData
+	nodes.forEach(n => {
+		if (n.x && n.x > window.innerWidth / 2) {
+			removeNode(n, state)
+		}
+	})
+}
+
 
 export default Kapsule({
 	props: {
@@ -160,6 +181,7 @@ export default Kapsule({
 					} else {
 						state.forceLayout.tick(); // Tick it
 						state.onEngineTick();
+						clearOutNode(state)
 					}
 				}
 			}
@@ -183,22 +205,15 @@ export default Kapsule({
 							return;
 						}
 
-						// if (node.x - 100 > window.innerWidth) {
-						// 	removeNode(node, state)
-						// }
-
 						/*平移动画*/
 						if (state.translateAnimation.enable) {
 							/*当node.x计算出来之后*/
 							if (node.x) {
 								if (state.anchor.value > window.innerWidth / 2) {
 									if (state.feedData) {
-										state.feedData(1, state.graphData)
+										state.feedData(state.graphData)
 									}
 									state.anchor.value = 0
-								}
-								if (node.x > window.innerWidth) {
-									removeNode(node, state)
 								}
 
 								if (node.flag) {
@@ -212,7 +227,7 @@ export default Kapsule({
 							// Draw wider nodes by 1px on shadow canvas for more precise hovering (due to boundary anti-aliasing)
 							const r = Math.sqrt(Math.max(0, getVal(node) || 1)) * state.nodeRelSize + padAmount;
 
-							node.x += 0.5;
+							node.x += 2;
 							ctx.beginPath();
 							ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
 
@@ -423,7 +438,7 @@ export default Kapsule({
 	stateInit: () => ({
 		forceLayout: d3ForceSimulation()
 			.force('link', d3ForceLink())
-			.force('charge', d3ForceManyBody())
+			.force('charge', d3ForceManyBody().strength(-5))
 			// .force('center', d3ForceCenter())
 			// .force('radial', d3ForceRadial(200, window.innerWidth/2, window.innerHeight/2, 0))
 			.force('dagRadial', null)
