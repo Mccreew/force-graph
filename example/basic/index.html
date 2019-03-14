@@ -20,6 +20,8 @@
       axios.get('http://localhost:8080/data/' + count).then(req => {
       	req.data.nodes.forEach(n => {
       		n.flag = 'new'
+          n.x = -800
+          n.y = -200
         })
         graphData.nodes.push(...req.data.nodes)
         graphData.links.push(...req.data.links)
@@ -27,14 +29,6 @@
         count += 1
         Graph.graphData(graphData)
       })
-		})
-		.refreshData((data) => {
-			console.log('refreshData: ', data)
-			try {
-				Graph.graphData(data)
-			} catch (e) {
-				console.log(e)
-			}
 		})
 		.onNodeClick(n => {
 			console.log(n)
@@ -49,6 +43,9 @@
 	axios.get('http://localhost:8080/data/1').then(req => {
 		let data = req.data
 
+    data.nodes.forEach(n => {
+    	n.x = -800
+    })
     // console.log('req.data: ', data)
 		Graph.graphData(data)
 	})

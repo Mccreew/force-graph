@@ -34,7 +34,7 @@ function removeNode(node, state) {
 	nodes.forEach((n, idx) => {
 		n.id = idx;
 	});
-	console.log('{nodes, links}: ', {nodes, links})
+	// console.log('{nodes, links}: ', {nodes, links})
 	// state.refreshData({nodes, links})
 }
 
@@ -88,7 +88,7 @@ export default Kapsule({
 		globalScale: {default: 1, triggerUpdate: false},
 		d3AlphaDecay: {
 			// default: 0.0228,
-			default: 0.02,
+			default: 0.01,
 			triggerUpdate: false, onChange(alphaDecay, state) {
 				state.forceLayout.alphaDecay(alphaDecay)
 			}
@@ -164,6 +164,7 @@ export default Kapsule({
 			paintLinks();
 			paintArrows();
 			paintPhotons();
+			bounceBack();
 			paintNodes();
 
 			return this;
@@ -184,6 +185,19 @@ export default Kapsule({
 						clearOutNode(state)
 					}
 				}
+			}
+
+			/**
+			 * 触碰到顶部和底部返回
+			 */
+			function bounceBack() {
+				state.graphData.nodes.forEach(n => {
+					if (n.y > 550 || n.y < -550) {
+						n.vy = -n.vy + 1
+						n.vx = -n.vx + 1
+						// state.forceLayout.alpha(1)
+					}
+				})
 			}
 
 			function paintNodes() {
@@ -437,7 +451,7 @@ export default Kapsule({
 
 	stateInit: () => ({
 		forceLayout: d3ForceSimulation()
-			.force('link', d3ForceLink())
+			.force('link', d3ForceLink().distance(60))
 			.force('charge', d3ForceManyBody().strength(-5))
 			// .force('center', d3ForceCenter())
 			// .force('radial', d3ForceRadial(200, window.innerWidth/2, window.innerHeight/2, 0))
