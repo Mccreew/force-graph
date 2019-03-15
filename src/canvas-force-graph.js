@@ -15,6 +15,8 @@ import indexBy from 'index-array-by';
 import {autoColorObjects} from './color-utils';
 import getDagDepths from './dagDepths';
 
+import { schemePaired } from 'd3-scale-chromatic';
+
 //
 
 const DAG_LEVEL_NODE_RATIO = 2;
@@ -88,7 +90,7 @@ export default Kapsule({
 		globalScale: {default: 1, triggerUpdate: false},
 		d3AlphaDecay: {
 			// default: 0.0228,
-			default: 0.01,
+			default: 0.0228,
 			triggerUpdate: false, onChange(alphaDecay, state) {
 				state.forceLayout.alphaDecay(alphaDecay)
 			}
@@ -122,6 +124,9 @@ export default Kapsule({
 			default: () => {
 			}, triggerUpdate: false
 		},
+		/*原始数据*/
+		originData:{default: {}, triggerUpdate: false},
+
 		isShadow: {default: false, triggerUpdate: false},
 
 		/*平移控制*/
@@ -216,37 +221,6 @@ export default Kapsule({
 						if (state.nodeCanvasObject) {
 							// Custom node paint
 							state.nodeCanvasObject(node, state.ctx, state.globalScale);
-							return;
-						}
-
-						/*平移动画*/
-						if (state.translateAnimation.enable) {
-							/*当node.x计算出来之后*/
-							if (node.x) {
-								if (state.anchor.value > window.innerWidth / 2) {
-									if (state.feedData) {
-										state.feedData(state.graphData)
-									}
-									state.anchor.value = 0
-								}
-
-								if (node.flag) {
-									/*第一次节点位置计算出来后，把节点放在更远的地方展开*/
-									node.x -= window.innerWidth / 2;
-									delete node.flag;
-								}
-							}
-
-							ctx.clearRect(0, 0, window.width, window.innerHeight);
-							// Draw wider nodes by 1px on shadow canvas for more precise hovering (due to boundary anti-aliasing)
-							const r = Math.sqrt(Math.max(0, getVal(node) || 1)) * state.nodeRelSize + padAmount;
-
-							node.x += 2;
-							ctx.beginPath();
-							ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
-
-							ctx.fillStyle = getColor(node) || 'rgba(31, 120, 180, 0.92)';
-							ctx.fill();
 							return;
 						}
 
@@ -467,6 +441,18 @@ export default Kapsule({
 	,
 
 	update(state) {
+
+		/*自动增加颜色*/
+		state.graphData.nodes.forEach(n => {
+			if (!n.color) {
+				n.color = schemePaired[n.group % 12]
+			}
+		})
+		state.graphData.links.forEach(l => {
+			if (!l.color) {
+				l.color = schemePaired[l.group % 12]
+			}
+		})
 
 
 		state.engineRunning = false; // Pause simulation

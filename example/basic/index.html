@@ -12,42 +12,73 @@
 <div id="graph"></div>
 
 <script>
-  let count = 2
+	let data;
 	const Graph = ForceGraph()
 	(document.getElementById('graph'))
-	// .linkDirectionalParticles(2)
-		.feedData((graphData) => {
-      axios.get('http://localhost:8080/data/' + count).then(req => {
-      	req.data.nodes.forEach(n => {
-      		n.flag = 'new'
-          n.x = -800
-          n.y = -200
-        })
-        graphData.nodes.push(...req.data.nodes)
-        graphData.links.push(...req.data.links)
+	// .linkDirectionalParticles(2))
+		.onNodeClick((n, od) => {
+			Graph.centerAt(n.x, n.y, 1000);
+			Graph.zoom(8, 2000);
 
-        count += 1
-        Graph.graphData(graphData)
-      })
-		})
-		.onNodeClick(n => {
-			console.log(n)
+
+			let base = n
+			let nextLayer = base.properties.layer + 1
+      let temp = {
+				nodes:[],
+        links:[]
+      };
+      temp.nodes = data.nodes.filter(n => n.properties.layer === nextLayer)
+
+			if (temp.nodes.length < 0)
+				return
+
+
+      data.links.forEach(l => {
+      	temp.nodes.forEach(n => {
+					if (l.target === n.id && l.source === base.id) {
+						l.group = n.properties.layer
+            // n.color = "rgb(255, 64, 64)"
+						temp.links.push(l)
+					}
+        })
+      });
+
+      od.nodes.push(...temp.nodes)
+      od.links.push(...temp.links)
+
+      console.log('od: ', od)
+
+      Graph.graphData(od)
 		})
 		.onEngineStop(() => {
 			console.log('animation end')
 		})
-    .onLinkClick(l => {
-    	console.log(l)
-    });
+		.onLinkClick(l => {
+			console.log(l)
+		})
+		.linkDirectionalArrowLength(4)
+		// .nodeAutoColorBy('group')
+		// .linkAutoColorBy('group');
 
 	axios.get('http://localhost:8080/data/1').then(req => {
-		let data = req.data
+		data = req.data
+    Graph.originData(data)
+    let insideData = new Object()
+    insideData = Object.assign(insideData, data)
 
-    data.nodes.forEach(n => {
-    	n.x = -800
-    })
-    // console.log('req.data: ', data)
-		Graph.graphData(data)
+		let firstLayerNodes = [];
+		insideData.nodes = insideData.nodes.filter(n => {
+			if (n.properties.layer === 0 ? n : null) {
+				firstLayerNodes.push(n)
+			}
+			return n.properties.layer === 0;
+		})
+
+		insideData.links = []
+
+
+
+		Graph.graphData(insideData)
 	})
 
 

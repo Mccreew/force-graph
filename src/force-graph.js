@@ -43,7 +43,8 @@ const linkedProps = Object.assign(
 		'onEngineTick',
 		'translateAnimation',
 		'rightNode',
-		'onEngineStop'
+		'onEngineStop',
+		'originData'
 	].map(p => ({[p]: bindFG.linkProp(p)})),
 	...[
 		'nodeRelSize',
@@ -448,12 +449,11 @@ export default Kapsule({
 
     // Handle click events on nodes/links
     container.addEventListener('click', ev => {
-      /*点击画布的时候，切换平移动画状态*/
-      state.translateAnimation.enable = !state.translateAnimation.enable
-      console.log(state.translateAnimation.enable)
+
+    	console.log('state.originData: ', state.originData)
 
       if (state.hoverObj) {
-        state[`on${state.hoverObj.type}Click`](state.hoverObj.d);
+        state[`on${state.hoverObj.type}Click`](state.hoverObj.d, state.graphData);
       }
     }, false);
 
