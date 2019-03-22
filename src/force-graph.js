@@ -128,6 +128,7 @@ function getRightNode(state) {
 
 export default Kapsule({
 	props: {
+		clickedNode:{default: null, triggerUpdate: false},
 		width: {default: window.innerWidth, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false},
 		height: {default: window.innerHeight, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false},
 		graphData: {
@@ -396,7 +397,7 @@ export default Kapsule({
 
 		state.zoom
 			.filter(() => state.enableZoomPanInteraction ? !d3Event.button : false) // disable zoom interaction
-			.scaleExtent([0.5, 10])
+			.scaleExtent([5, 10])
 			// .translateExtent([null, [window.innerWidth + 20, window.innerHeight + 20]])
 			.on('zoom', function (d, i, self) {
 				const t = d3ZoomTransform(this); // Same as d3.event.transform
@@ -450,9 +451,22 @@ export default Kapsule({
     // Handle click events on nodes/links
     container.addEventListener('click', ev => {
 
-    	console.log('state.originData: ', state.originData)
+    	// console.log('state.originData: ', state.originData)
 
       if (state.hoverObj) {
+
+      	// console.log('鼠标:', mousePos.x, mousePos.y, ' node: ', state.hoverObj.x, state.hoverObj.y)
+				if (state.hoverObj.type === 'Node') {
+					state.hoverObj.d.clicked = state.hoverObj.d.clicked ? false : true;
+					if (state.hoverObj.d.clicked) {
+						if (state.clickedNode) {
+							state.clickedNode.clicked = false
+						}
+						state.clickedNode = state.hoverObj.d;
+					} else if (state.clickedNode) {
+						state.clickedNode = null
+					}
+				}
         state[`on${state.hoverObj.type}Click`](state.hoverObj.d, state.graphData);
       }
     }, false);

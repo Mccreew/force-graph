@@ -6,6 +6,7 @@
 
   <!--<script src="//unpkg.com/force-graph"></script>-->
   <script src="../../dist/force-graph.js"></script>
+  <script src="drawControlCircle.js"></script>
 </head>
 
 <body>
@@ -17,38 +18,27 @@
 	(document.getElementById('graph'))
 	// .linkDirectionalParticles(2))
 		.onNodeClick((n, od) => {
+
+			console.log('node.position: ', n.x, n.y)
 			Graph.centerAt(n.x, n.y, 1000);
-			Graph.zoom(8, 2000);
 
 
-			let base = n
-			let nextLayer = base.properties.layer + 1
-      let temp = {
-				nodes:[],
-        links:[]
-      };
-      temp.nodes = data.nodes.filter(n => n.properties.layer === nextLayer)
-
-			if (temp.nodes.length < 0)
+			if (n.expand) {
 				return
+			}
+			n.expand = true
+			// Graph.zoom(8, 2000);
+
+			axios.get('http://localhost:8080/start/' + n.id).then(req => {
+				od.nodes.push(...req.data.nodes)
+				od.links.push(...req.data.links)
+
+				console.log('od: ', od)
+
+				Graph.graphData(od)
+			})
 
 
-      data.links.forEach(l => {
-      	temp.nodes.forEach(n => {
-					if (l.target === n.id && l.source === base.id) {
-						l.group = n.properties.layer
-            // n.color = "rgb(255, 64, 64)"
-						temp.links.push(l)
-					}
-        })
-      });
-
-      od.nodes.push(...temp.nodes)
-      od.links.push(...temp.links)
-
-      console.log('od: ', od)
-
-      Graph.graphData(od)
 		})
 		.onEngineStop(() => {
 			console.log('animation end')
@@ -57,14 +47,13 @@
 			console.log(l)
 		})
 		.linkDirectionalArrowLength(4)
-		// .nodeAutoColorBy('group')
-		// .linkAutoColorBy('group');
+	// .nodeAutoColorBy('group')
+	// .linkAutoColorBy('group');
 
 	axios.get('http://localhost:8080/data/1').then(req => {
 		data = req.data
-    Graph.originData(data)
-    let insideData = new Object()
-    insideData = Object.assign(insideData, data)
+		let insideData = new Object()
+		insideData = Object.assign(insideData, data)
 
 		let firstLayerNodes = [];
 		insideData.nodes = insideData.nodes.filter(n => {
@@ -77,7 +66,7 @@
 		insideData.links = []
 
 
-
+		Graph.originData(insideData)
 		Graph.graphData(insideData)
 	})
 

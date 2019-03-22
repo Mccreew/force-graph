@@ -15,7 +15,9 @@ import indexBy from 'index-array-by';
 import {autoColorObjects} from './color-utils';
 import getDagDepths from './dagDepths';
 
-import { schemePaired } from 'd3-scale-chromatic';
+import {schemePaired} from 'd3-scale-chromatic';
+
+import drawControl from './drawControl'
 
 //
 
@@ -125,7 +127,7 @@ export default Kapsule({
 			}, triggerUpdate: false
 		},
 		/*原始数据*/
-		originData:{default: {}, triggerUpdate: false},
+		originData: {default: {}, triggerUpdate: false},
 
 		isShadow: {default: false, triggerUpdate: false},
 
@@ -224,13 +226,18 @@ export default Kapsule({
 							return;
 						}
 
+
 						// Draw wider nodes by 1px on shadow canvas for more precise hovering (due to boundary anti-aliasing)
 						const r = Math.sqrt(Math.max(0, getVal(node) || 1)) * state.nodeRelSize + padAmount;
-
+						node.radius = r
 						ctx.beginPath();
 						ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
 						ctx.fillStyle = getColor(node) || 'rgba(31, 120, 180, 0.92)';
 						ctx.fill();
+						/*节点处于点击状态时绘制轮盘*/
+						if (node.clicked) {
+							drawControl(state.ctx, node)
+						}
 					}
 				);
 				ctx.restore();
