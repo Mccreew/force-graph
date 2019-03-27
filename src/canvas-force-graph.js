@@ -147,7 +147,13 @@ export default Kapsule({
 		refreshData: {
 			default: () => {
 			}, triggerUpdate: false
-		}
+		},
+		/*colorTracker同步force-graph*/
+		canvasColorTracker: {default: null, triggerUpdate: false},
+		/*当前点击node的轮盘，color tracker只赋值一次*/
+		changeClickNode:{default:null, triggerUpdate:false},
+		/*控制轮盘数据*/
+		controlTools:{default:null, triggerUpdate:false}
 	},
 
 	methods: {
@@ -236,7 +242,9 @@ export default Kapsule({
 						ctx.fill();
 						/*节点处于点击状态时绘制轮盘*/
 						if (node.clicked) {
-							drawControl(state.ctx, node)
+							// console.log('state.canvasColorTracker: ', state.canvasColorTracker)
+							drawControl(state.ctx, node, state.controlTools, state.isShadow)
+							state.changeClickNode = false
 						}
 					}
 				);

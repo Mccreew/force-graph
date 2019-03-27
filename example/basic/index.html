@@ -19,8 +19,10 @@
 	// .linkDirectionalParticles(2))
 		.onNodeClick((n, od) => {
 
-			console.log('node.position: ', n.x, n.y)
+			// console.log('node.position: ', n.x, n.y)
 			Graph.centerAt(n.x, n.y, 1000);
+
+			// console.log('Graph.centerAt: ', Graph.centerAt(), 'Graph.zoom: ', Graph.zoom())
 
 
 			if (n.expand) {
@@ -33,12 +35,10 @@
 				od.nodes.push(...req.data.nodes)
 				od.links.push(...req.data.links)
 
-				console.log('od: ', od)
+				// console.log('od: ', od)
 
 				Graph.graphData(od)
 			})
-
-
 		})
 		.onEngineStop(() => {
 			console.log('animation end')
@@ -69,7 +69,5 @@
 		Graph.originData(insideData)
 		Graph.graphData(insideData)
 	})
-
-
 </script>
 </body>

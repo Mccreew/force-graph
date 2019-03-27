@@ -1,6 +1,6 @@
-import {select as d3Select, event as d3Event} from 'd3-selection';
-import {zoom as d3Zoom, zoomTransform as d3ZoomTransform} from 'd3-zoom';
-import {drag as d3Drag} from 'd3-drag';
+import { select as d3Select, event as d3Event } from 'd3-selection';
+import { zoom as d3Zoom, zoomTransform as d3ZoomTransform } from 'd3-zoom';
+import { drag as d3Drag } from 'd3-drag';
 import throttle from 'lodash.throttle';
 import TWEEN from '@tweenjs/tween.js';
 import Kapsule from 'kapsule';
@@ -9,6 +9,7 @@ import ColorTracker from 'canvas-color-tracker';
 
 import CanvasForceGraph from './canvas-force-graph';
 import linkKapsule from './kapsule-link.js';
+import { stat } from 'fs';
 
 const HOVER_CANVAS_THROTTLE_DELAY = 800; // ms to throttle shadow canvas updates for perf improvement
 const ZOOM2NODES_FACTOR = 4;
@@ -44,8 +45,9 @@ const linkedProps = Object.assign(
 		'translateAnimation',
 		'rightNode',
 		'onEngineStop',
-		'originData'
-	].map(p => ({[p]: bindFG.linkProp(p)})),
+		'originData',
+		'canvasColorTracker'
+	].map(p => ({ [p]: bindFG.linkProp(p) })),
 	...[
 		'nodeRelSize',
 		'nodeId',
@@ -54,13 +56,13 @@ const linkedProps = Object.assign(
 		'linkTarget',
 		'linkVisibility',
 		'linkCurvature'
-	].map(p => ({[p]: bindBoth.linkProp(p)}))
+	].map(p => ({ [p]: bindBoth.linkProp(p) }))
 );
 const linkedMethods = Object.assign(...[
 	'd3Force',
 	'feedData',
 	'refreshData'
-].map(p => ({[p]: bindFG.linkMethod(p)})));
+].map(p => ({ [p]: bindFG.linkMethod(p) })));
 
 function adjustCanvasSize(state) {
 	if (state.canvas) {
@@ -128,26 +130,26 @@ function getRightNode(state) {
 
 export default Kapsule({
 	props: {
-		clickedNode:{default: null, triggerUpdate: false},
-		width: {default: window.innerWidth, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false},
-		height: {default: window.innerHeight, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false},
+		clickedNode: { default: null, triggerUpdate: false },
+		width: { default: window.innerWidth, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false },
+		height: { default: window.innerHeight, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false },
 		graphData: {
-			default: {nodes: [], links: []},
+			default: { nodes: [], links: [] },
 			onChange: ((d, state) => {
 				if (d.nodes.length || d.links.length) {
 					console.info('force-graph loading', d.nodes.length + ' nodes', d.links.length + ' links');
 				}
 
-				[{type: 'Node', objs: d.nodes}, {type: 'Link', objs: d.links}].forEach(hexIndex);
+				[{ type: 'Node', objs: d.nodes }, { type: 'Link', objs: d.links }].forEach(hexIndex);
 				state.forceGraph.graphData(d);
 				state.shadowGraph.graphData(d);
 
-				function hexIndex({type, objs}) {
+				function hexIndex({ type, objs }) {
 					objs
 						.filter(d => !d.hasOwnProperty('__indexColor') || d !== state.colorTracker.lookup(d.__indexColor))
 						.forEach(d => {
 							// store object lookup color
-							d.__indexColor = state.colorTracker.register({type, d});
+							d.__indexColor = state.colorTracker.register({ type, d });
 						});
 				}
 			}),
@@ -158,11 +160,11 @@ export default Kapsule({
 				state.canvas && color && (state.canvas.style.background = color)
 			}, triggerUpdate: false
 		},
-		nodeLabel: {default: 'name', triggerUpdate: false},
-		linkLabel: {default: 'name', triggerUpdate: false},
-		linkHoverPrecision: {default: 4, triggerUpdate: false},
-		enableNodeDrag: {default: true, triggerUpdate: false},
-		enableZoomPanInteraction: {default: true, triggerUpdate: false},
+		nodeLabel: { default: 'name', triggerUpdate: false },
+		linkLabel: { default: 'name', triggerUpdate: false },
+		linkHoverPrecision: { default: 4, triggerUpdate: false },
+		enableNodeDrag: { default: true, triggerUpdate: false },
+		enableZoomPanInteraction: { default: true, triggerUpdate: false },
 		enablePointerInteraction: {
 			default: true, onChange(_, state) {
 				state.hoverObj = null;
@@ -180,7 +182,7 @@ export default Kapsule({
 			default: () => {
 			}, triggerUpdate: false
 		},
-		onNodeRightClick: {triggerUpdate: false},
+		onNodeRightClick: { triggerUpdate: false },
 		onNodeHover: {
 			default: () => {
 			}, triggerUpdate: false
@@ -189,10 +191,16 @@ export default Kapsule({
 			default: () => {
 			}, triggerUpdate: false
 		},
-		onLinkRightClick: {triggerUpdate: false},
+		onLinkRightClick: { triggerUpdate: false },
 		onLinkHover: {
 			default: () => {
 			}, triggerUpdate: false
+		},
+		onControlCircleHover: {
+			default: () => { }, triggerUpdate: false
+		},
+		onControlCircleClick: {
+			default: () => { }, triggerUpdate: false
 		},
 		// firstClick:{default:false, triggerUpdate: false},
 		...linkedProps
@@ -209,8 +217,8 @@ export default Kapsule({
 			// setter
 			if (x !== undefined || y !== undefined) {
 				const finalPos = Object.assign({},
-					x !== undefined ? {x} : {},
-					y !== undefined ? {y} : {}
+					x !== undefined ? { x } : {},
+					y !== undefined ? { y } : {}
 				);
 				if (!transitionDuration) { // no animation
 					setCenter(finalPos);
@@ -231,10 +239,10 @@ export default Kapsule({
 
 			function getCenter() {
 				const t = d3ZoomTransform(state.canvas);
-				return {x: (state.width / 2 - t.x) / t.k, y: (state.height / 2 - t.y) / t.k};
+				return { x: (state.width / 2 - t.x) / t.k, y: (state.height / 2 - t.y) / t.k };
 			}
 
-			function setCenter({x, y}) {
+			function setCenter({ x, y }) {
 				state.zoom.translateTo(
 					state.zoom.__baseElem,
 					x === undefined ? getCenter().x : x,
@@ -250,10 +258,10 @@ export default Kapsule({
 				if (!transitionDuration) { // no animation
 					setZoom(k);
 				} else {
-					new TWEEN.Tween({k: getZoom()})
-						.to({k}, transitionDuration)
+					new TWEEN.Tween({ k: getZoom() })
+						.to({ k }, transitionDuration)
 						.easing(TWEEN.Easing.Quadratic.Out)
-						.onUpdate(({k}) => setZoom(k))
+						.onUpdate(({ k }) => setZoom(k))
 						.start();
 				}
 				return this;
@@ -287,7 +295,7 @@ export default Kapsule({
 		},
 		_destructor: function () {
 			this.pauseAnimation();
-			this.graphData({nodes: [], links: []});
+			this.graphData({ nodes: [], links: [] });
 		},
 		...linkedMethods
 	},
@@ -306,6 +314,13 @@ export default Kapsule({
 	init: function (domNode, state) {
 		// Wipe DOM
 		domNode.innerHTML = '';
+
+		/*同步canvas-force-graph的colorTracker*/
+		state.forceGraph.canvasColorTracker(state.colorTracker)
+		state.shadowGraph.canvasColorTracker(state.colorTracker)
+		// console.log('state.forceGraph: ', state.forceGraph)
+		// console.log('state.canvasColorTracker: ', state.canvasColorTracker)
+		console.log('state.colorTracker: ', state.colorTracker)
 
 		// Container anchor for canvas and tooltip
 		const container = document.createElement('div');
@@ -339,7 +354,7 @@ export default Kapsule({
 				})
 				.on('start', () => {
 					const obj = d3Event.subject;
-					obj.__initialDragPos = {x: obj.x, y: obj.y, fx: obj.fx, fy: obj.fy};
+					obj.__initialDragPos = { x: obj.x, y: obj.y, fx: obj.fx, fy: obj.fy };
 
 					// keep engine running at low intensity throughout drag
 					if (!d3Event.active) {
@@ -426,7 +441,7 @@ export default Kapsule({
 		container.appendChild(toolTipElem);
 
 		// Capture mouse coords on move
-		const mousePos = {x: -1e12, y: -1e12};
+		const mousePos = { x: -1e12, y: -1e12 };
 		state.canvas.addEventListener('mousemove', ev => {
 			// update the mouse pos
 			const offset = getOffset(container);
@@ -443,20 +458,22 @@ export default Kapsule({
 				const rect = el.getBoundingClientRect(),
 					scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
 					scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-				return {top: rect.top + scrollTop, left: rect.left + scrollLeft};
+				return { top: rect.top + scrollTop, left: rect.left + scrollLeft };
 			}
 
 		}, false);
 
-    // Handle click events on nodes/links
-    container.addEventListener('click', ev => {
+		// Handle click events on nodes/links
+		container.addEventListener('click', ev => {
+			const pxScale = window.devicePixelRatio;
+			const px = shadowCtx.getImageData(mousePos.x * pxScale, mousePos.y * pxScale, 1, 1);
+			console.log('px: ', px)
 
-    	// console.log('state.originData: ', state.originData)
-
-      if (state.hoverObj) {
-
-      	// console.log('鼠标:', mousePos.x, mousePos.y, ' node: ', state.hoverObj.x, state.hoverObj.y)
+			if (state.hoverObj) {
+				console.log('state.hoverObj: ', state.hoverObj)
 				if (state.hoverObj.type === 'Node') {
+					console.log('node: ', state.hoverObj.d)
+					console.log('node position: ', state.hoverObj.d.x, state.hoverObj.d.y)
 					state.hoverObj.d.clicked = state.hoverObj.d.clicked ? false : true;
 					if (state.hoverObj.d.clicked) {
 						if (state.clickedNode) {
@@ -466,10 +483,13 @@ export default Kapsule({
 					} else if (state.clickedNode) {
 						state.clickedNode = null
 					}
+					/*每次点击都视为改变了node*/
+					state.forceGraph.changeClickNode(true)
+					state.shadowGraph.changeClickNode(true)
 				}
-        state[`on${state.hoverObj.type}Click`](state.hoverObj.d, state.graphData);
-      }
-    }, false);
+				state[`on${state.hoverObj.type}Click`](state.hoverObj.d, state.graphData);
+			}
+		}, false);
 
 		// Handle right-click events
 		container.addEventListener('contextmenu', ev => {
@@ -524,6 +544,7 @@ export default Kapsule({
 						state[`on${objType}Hover`](obj.d, prevObjType === objType ? prevObj.d : null);
 					}
 
+
 					const tooltipContent = obj ? accessorFn(state[`${obj.type.toLowerCase()}Label`])(obj.d) || '' : '';
 					toolTipElem.style.visibility = tooltipContent ? 'visible' : 'hidden';
 					toolTipElem.innerHTML = tooltipContent;
@@ -545,6 +566,18 @@ export default Kapsule({
 
 			state.animationFrameRequestId = requestAnimationFrame(animate);
 		})();
+
+		/*注册控制轮盘的__indexColor*/
+		let toolTypes = ['first', 'second', 'third']
+		let controlTools = []
+		for (let i = 0; i < 3; i++) {
+			let obj = {
+				type: toolTypes[i]
+			}
+			obj.__indexColor = state.colorTracker.register({ type: 'ControlCircle', data: obj });
+			controlTools.push(obj)
+		}
+		state.shadowGraph.controlTools(controlTools)
 
 	},
 

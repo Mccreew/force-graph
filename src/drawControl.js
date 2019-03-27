@@ -5,55 +5,55 @@ let contrCle = {}
 // contrCle.radius = 100
 contrCle.startAngle = pi * 3 / 2 + spaceAngle
 contrCle.endAngle = pi * 3 / 2 + pi * 2 / 3
-// contrCle.space = 5
+contrCle.space = 0.3
 
-export default function (ctx, centerCircle) {
-	contrCle.radius = centerCircle.radius * 2.3
-	contrCle.space = 0.5
+
+export default function (ctx, centerCircle, controlTools, isShadowCanvas) {
+	let outCircle = {}
+	outCircle = Object.assign(outCircle, contrCle)
+	outCircle.radius = centerCircle.radius * 2 + 1
+
 
 	for (let i = 0; i < 3; i++) {
+		let shadowColor = null
+		if (isShadowCanvas && controlTools) {
+			shadowColor = controlTools[i].__indexColor
+		}
 		if (i === 0) {
-			drawContrCircle(ctx, centerCircle)
+			drawContrCircle(ctx, centerCircle, shadowColor, outCircle)
 			continue
 		}
-		let sAToEa = contrCle.endAngle - contrCle.startAngle
-		contrCle.startAngle = contrCle.endAngle + spaceAngle
-		contrCle.endAngle = contrCle.startAngle + sAToEa
-		drawContrCircle(ctx, centerCircle)
+		let sAToEa = outCircle.endAngle - outCircle.startAngle;
+		outCircle.startAngle = outCircle.endAngle + spaceAngle;
+		outCircle.endAngle = outCircle.startAngle + sAToEa;
+		drawContrCircle(ctx, centerCircle, shadowColor, outCircle);
 	}
 }
 
-function drawContrCircle(ctx, centerCle) {
-	/************/
-	console.log('contrCircle: ', contrCle.radius)
-	console.log('centerCle: ', centerCle.radius)
-
-
+function drawContrCircle(ctx, centerCle, shadowColor, outCircle) {
 	ctx.save()
-	ctx.fillStyle = '#EAECEE'
+
+
 	// ctx.fillStyle = 'rgb(' + (244 + i * 30) + ', ' + (208 + i * 20) + ', ' + (63 + i) +')'
+	ctx.fillStyle = shadowColor ? shadowColor : '#626567'
 
-	contrCle.x = centerCle.x
-	contrCle.y = centerCle.y
+	outCircle.x = centerCle.x
+	outCircle.y = centerCle.y
 
-	contrCle.insideRadius = centerCle.radius + contrCle.space
-	contrCle.ruPointX = contrCle.x + contrCle.radius * Math.cos(contrCle.startAngle)
-	contrCle.ruPointY = contrCle.y + contrCle.radius * Math.sin(contrCle.startAngle)
-	// contrCle.rdPointX = contrCle.x + contrCle.insideRadius * Math.cos(contrCle.startAngle)
-	// contrCle.rdPointY = contrCle.y + contrCle.insideRadius * Math.sin(contrCle.startAngle)
+	outCircle.insideRadius = centerCle.radius + outCircle.space
+	outCircle.ruPointX = outCircle.x + outCircle.radius * Math.cos(outCircle.startAngle)
+	outCircle.ruPointY = outCircle.y + outCircle.radius * Math.sin(outCircle.startAngle)
 
-	let endPosition = getEndPosition(contrCle, true)
-	// endPosition = getEndPosition(contrCle, true)
-	contrCle.ldPointX = endPosition.ex
-	contrCle.ldPointY = endPosition.ey
-
+	let endPosition = getEndPosition(outCircle, true)
+	outCircle.ldPointX = endPosition.ex
+	outCircle.ldPointY = endPosition.ey
 
 
 	ctx.beginPath()
-	ctx.arc(contrCle.x, contrCle.y, contrCle.radius, contrCle.startAngle, contrCle.endAngle)
-	ctx.lineTo(contrCle.ldPointX, contrCle.ldPointY)
-	ctx.arc(contrCle.x, contrCle.y, contrCle.insideRadius, contrCle.endAngle, contrCle.startAngle, true)
-	ctx.lineTo(contrCle.ruPointX, contrCle.ruPointY)
+	ctx.arc(outCircle.x, outCircle.y, outCircle.radius, outCircle.startAngle, outCircle.endAngle)
+	ctx.lineTo(outCircle.ldPointX, outCircle.ldPointY)
+	ctx.arc(outCircle.x, outCircle.y, outCircle.insideRadius, outCircle.endAngle, outCircle.startAngle, true)
+	ctx.lineTo(outCircle.ruPointX, outCircle.ruPointY)
 	ctx.closePath()
 	ctx.fill()
 	ctx.restore()
@@ -66,5 +66,5 @@ function getEndPosition(contrCircle, isInside = false) {
 	let ex = radius * Math.cos(arc) + contrCircle.x
 	let ey = radius * Math.sin(arc) + contrCircle.y
 
-	return { ex, ey }
+	return {ex, ey}
 }
