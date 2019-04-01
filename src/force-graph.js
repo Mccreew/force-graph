@@ -465,12 +465,10 @@ export default Kapsule({
 
 		// Handle click events on nodes/links
 		container.addEventListener('click', ev => {
-			const pxScale = window.devicePixelRatio;
-			const px = shadowCtx.getImageData(mousePos.x * pxScale, mousePos.y * pxScale, 1, 1);
-			console.log('px: ', px)
-
 			if (state.hoverObj) {
-				console.log('state.hoverObj: ', state.hoverObj)
+				// if(state.hoverObj.type === 'ControlCircle'){
+					// console.log('tool: ', state.hoverObj.d)
+				// }
 				if (state.hoverObj.type === 'Node') {
 					console.log('node: ', state.hoverObj.d)
 					console.log('node position: ', state.hoverObj.d.x, state.hoverObj.d.y)
@@ -487,7 +485,7 @@ export default Kapsule({
 					state.forceGraph.changeClickNode(true)
 					state.shadowGraph.changeClickNode(true)
 				}
-				state[`on${state.hoverObj.type}Click`](state.hoverObj.d, state.graphData);
+				state[`on${state.hoverObj.type}Click`](state.hoverObj.d, state.graphData, state.clickedNode);
 			}
 		}, false);
 
@@ -568,13 +566,13 @@ export default Kapsule({
 		})();
 
 		/*注册控制轮盘的__indexColor*/
-		let toolTypes = ['first', 'second', 'third']
+		let toolTypes = ['firstCon', 'secondCon', 'thirdCon']
 		let controlTools = []
 		for (let i = 0; i < 3; i++) {
 			let obj = {
 				type: toolTypes[i]
 			}
-			obj.__indexColor = state.colorTracker.register({ type: 'ControlCircle', data: obj });
+			obj.__indexColor = state.colorTracker.register({ type: 'ControlCircle', d: obj });
 			controlTools.push(obj)
 		}
 		state.shadowGraph.controlTools(controlTools)

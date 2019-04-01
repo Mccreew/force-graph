@@ -7,7 +7,7 @@ contrCle.startAngle = pi * 3 / 2 + spaceAngle
 contrCle.endAngle = pi * 3 / 2 + pi * 2 / 3
 contrCle.space = 0.3
 
-
+// TODO tween.js提升绘制轮盘效果
 export default function (ctx, centerCircle, controlTools, isShadowCanvas) {
 	let outCircle = {}
 	outCircle = Object.assign(outCircle, contrCle)
