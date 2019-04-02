@@ -533,11 +533,21 @@ export default Kapsule({
 					const prevObjType = prevObj ? prevObj.type : null;
 					const objType = obj ? obj.type : null;
 
+					// hover移出轮盘
+					if(prevObjType !== objType && prevObjType === 'ControlCircle'){
+							state.forceGraph.hoverType(null)
+					}
+
 					if (prevObjType && prevObjType !== objType) {
 						// Hover out
 						state[`on${prevObjType}Hover`](null, prevObj.d);
 					}
 					if (objType) {
+						// hover轮盘
+						if(objType === 'ControlCircle'){
+							state.forceGraph.hoverType(obj.d.type)
+						}
+						
 						// Hover in
 						state[`on${objType}Hover`](obj.d, prevObjType === objType ? prevObj.d : null);
 					}

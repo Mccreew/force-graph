@@ -7,35 +7,51 @@ contrCle.startAngle = pi * 3 / 2 + spaceAngle
 contrCle.endAngle = pi * 3 / 2 + pi * 2 / 3
 contrCle.space = 0.3
 
+let controlType = {
+	'firstCon':0,
+	'secondCon':1,
+	'thirdCon':2
+}
+
 // TODO tween.js提升绘制轮盘效果
-export default function (ctx, centerCircle, controlTools, isShadowCanvas) {
+export default function (ctx, centerCircle, controlTools, isShadowCanvas, hoverType) {
 	let outCircle = {}
 	outCircle = Object.assign(outCircle, contrCle)
 	outCircle.radius = centerCircle.radius * 2 + 1
-
+	
 
 	for (let i = 0; i < 3; i++) {
 		let shadowColor = null
+		let isHover = controlType[hoverType] === i
+
 		if (isShadowCanvas && controlTools) {
 			shadowColor = controlTools[i].__indexColor
 		}
 		if (i === 0) {
-			drawContrCircle(ctx, centerCircle, shadowColor, outCircle)
+			drawContrCircle(ctx, centerCircle, shadowColor, outCircle, isHover)
 			continue
 		}
 		let sAToEa = outCircle.endAngle - outCircle.startAngle;
 		outCircle.startAngle = outCircle.endAngle + spaceAngle;
 		outCircle.endAngle = outCircle.startAngle + sAToEa;
-		drawContrCircle(ctx, centerCircle, shadowColor, outCircle);
+		drawContrCircle(ctx, centerCircle, shadowColor, outCircle, isHover);
 	}
 }
 
-function drawContrCircle(ctx, centerCle, shadowColor, outCircle) {
+function drawContrCircle(ctx, centerCle, shadowColor, outCircle, isHover) {
 	ctx.save()
 
 
 	// ctx.fillStyle = 'rgb(' + (244 + i * 30) + ', ' + (208 + i * 20) + ', ' + (63 + i) +')'
-	ctx.fillStyle = shadowColor ? shadowColor : '#626567'
+	// ctx.fillStyle = shadowColor ? shadowColor : '#808B96'
+	// ctx.fillStyle = isHover ? '#566573' : ctx.fillStyle
+	if(shadowColor){
+		ctx.fillStyle = shadowColor
+	}else if(isHover){
+		ctx.fillStyle = '#A4A4A4'
+	}else{
+		ctx.fillStyle = '#E6E6E6'
+	}
 
 	outCircle.x = centerCle.x
 	outCircle.y = centerCle.y
