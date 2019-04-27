@@ -4,6 +4,12 @@
 		body {
 			margin: 0;
 		}
+
+		/* div{
+			width: 500px;
+			height: 500px;
+			border: solid 1px blueviolet
+		} */
 	</style>
 
 	<!--<script src="//unpkg.com/force-graph"></script>-->
@@ -15,70 +21,55 @@
 	<div id="graph"></div>
 
 	<script>
+		let requestUrl = 'http://localhost:8080/data/1'
+		// let requestUrl = 'http://localhost:8080/node/1304535'
+
 		let data;
 		const Graph = ForceGraph()
-			(document.getElementById('graph'))
+			(document.getElementById('graph')).width(1000).height(800)
 			// .linkDirectionalParticles(2))
 			.onNodeClick((n, od) => {
-				Graph.centerAt(n.x, n.y, 1000);
+				console.log(n)
 				if (n.expand) {
 					return
 				}
 				n.expand = true
-				axios.get('http://localhost:8080/start/' + n.id).then(req => {
+
+				let nodeIdSet = new Set()
+				od.nodes.forEach(node => {
+					nodeIdSet.add(node.id)
+				})
+
+				axios.get('http://localhost:8080/child/' + n.id).then(req => {
+					req.data.nodes.forEach((node, index) => {
+						if(nodeIdSet.has(node.id)){
+							req.data.nodes.splice(index, 1)
+						}else{
+							nodeIdSet.add(node.id)
+						}
+					})
 					od.nodes.push(...req.data.nodes)
 					od.links.push(...req.data.links)
 					Graph.graphData(od)
 				})
-			})
-			.onEngineStop(() => {
-				console.log('animation end')
+
 			})
 			.onLinkClick(l => {
 				console.log(l)
 			})
 			.linkDirectionalArrowLength(4)
 			.onControlCircleClick((d, od, clickNode) => {
-				if(d.type === 'firstCon'){
-					console.log('first clicked')
-					axios.get('http://localhost:8080/childNode/' + clickNode.id).then(req => {
-						clickNode.expand = false
 
-						let childNodeIds = []
-						req.data.nodes.forEach(n => {
-							childNodeIds.push(n.id)
-						});
-
-						let newNodes = od.nodes.filter(n => childNodeIds.indexOf(n.id) === -1)
-						console.log('after filter nodes: ', newNodes)
-						let newLinks = od.links.filter(l => childNodeIds.indexOf(l.source.id) === -1 && childNodeIds.indexOf(l.target.id) === -1)
-						console.log('after filter links: ', newLinks)
-
-						od.nodes = newNodes
-						od.links = newLinks
-						Graph.graphData(od)
-					})
-				}
-				if(d.type === 'secondCon'){
-					console.log('second clicked')
-				}
-				if(d.type === 'thirdCon'){
-					console.log('third clicked')
-				}
 			})
 
 
-		
-		axios.get('http://localhost:8080/data/1').then(req => {
+
+		axios.get(requestUrl).then(req => {
 			data = req.data
 			let insideData = new Object()
 			insideData = Object.assign(insideData, data)
 
-			let firstLayerNodes = [];
 			insideData.nodes = insideData.nodes.filter(n => {
-				if (n.properties.layer === 0) {
-					firstLayerNodes.push(n)
-				}
 				return n.properties.layer === 0;
 			})
 

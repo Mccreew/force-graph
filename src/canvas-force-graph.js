@@ -6,16 +6,16 @@ import {
 	forceRadial as d3ForceRadial
 } from 'd3-force-3d';
 
-import {default as Bezier} from 'bezier-js';
+import { default as Bezier } from 'bezier-js';
 
 import Kapsule from 'kapsule';
 import accessorFn from 'accessor-fn';
 import indexBy from 'index-array-by';
 
-import {autoColorObjects} from './color-utils';
+import { autoColorObjects } from './color-utils';
 import getDagDepths from './dagDepths';
 
-import {schemePaired} from 'd3-scale-chromatic';
+import { schemePaired } from 'd3-scale-chromatic';
 
 import drawControl from './drawControl'
 
@@ -24,15 +24,15 @@ import drawControl from './drawControl'
 const DAG_LEVEL_NODE_RATIO = 2;
 
 function removeNode(node, state) {
-	let {nodes, links} = state.graphData
+	let { nodes, links } = state.graphData
 	// console.log('delete node: ', node)
 	// links = links.filter(l => l.source.id !== node.id && l.target.id !== node.id); // Remove links attached to node
 	links.forEach((l, idx) => {
-			if (l.source === node || l.target === node) {
-				links.splice(idx, 1)
-				// console.log('delete link: ', l)
-			}
+		if (l.source === node || l.target === node) {
+			links.splice(idx, 1)
+			// console.log('delete link: ', l)
 		}
+	}
 	)
 	nodes.splice(node.id, 1)
 	nodes.forEach((n, idx) => {
@@ -46,7 +46,7 @@ function removeNode(node, state) {
 // const myWorker = new Worker('/home/jw/WebstormProjects/force-graph/src/worker.js')
 
 function clearOutNode(state) {
-	let {nodes, links} = state.graphData
+	let { nodes, links } = state.graphData
 	nodes.forEach(n => {
 		if (n.x && n.x > window.innerWidth / 2) {
 			removeNode(n, state)
@@ -68,28 +68,28 @@ export default Kapsule({
 		},
 		dagMode: {}, // td, bu, lr, rl, radialin, radialout
 		dagLevelDistance: {},
-		nodeRelSize: {default: 4, triggerUpdate: false}, // area per val unit
-		nodeId: {default: 'id'},
-		nodeVal: {default: 'val', triggerUpdate: false},
-		nodeColor: {default: 'color', triggerUpdate: false},
+		nodeRelSize: { default: 4, triggerUpdate: false }, // area per val unit
+		nodeId: { default: 'id' },
+		nodeVal: { default: 'val', triggerUpdate: false },
+		nodeColor: { default: 'color', triggerUpdate: false },
 		nodeAutoColorBy: {},
-		nodeCanvasObject: {triggerUpdate: false},
-		linkSource: {default: 'source'},
-		linkTarget: {default: 'target'},
-		linkVisibility: {default: true, triggerUpdate: false},
-		linkColor: {default: 'color', triggerUpdate: false},
+		nodeCanvasObject: { triggerUpdate: false },
+		linkSource: { default: 'source' },
+		linkTarget: { default: 'target' },
+		linkVisibility: { default: true, triggerUpdate: false },
+		linkColor: { default: 'color', triggerUpdate: false },
 		linkAutoColorBy: {},
-		linkWidth: {default: 1, triggerUpdate: false},
-		linkCurvature: {default: 0, triggerUpdate: false},
-		linkCanvasObject: {triggerUpdate: false},
-		linkDirectionalArrowLength: {default: 0, triggerUpdate: false},
-		linkDirectionalArrowColor: {triggerUpdate: false},
-		linkDirectionalArrowRelPos: {default: 0.5, triggerUpdate: false}, // value between 0<>1 indicating the relative pos along the (exposed) line
-		linkDirectionalParticles: {default: 0}, // animate photons travelling in the link direction
-		linkDirectionalParticleSpeed: {default: 0.01, triggerUpdate: false}, // in link length ratio per frame
-		linkDirectionalParticleWidth: {default: 4, triggerUpdate: false},
-		linkDirectionalParticleColor: {triggerUpdate: false},
-		globalScale: {default: 1, triggerUpdate: false},
+		linkWidth: { default: 1, triggerUpdate: false },
+		linkCurvature: { default: 0, triggerUpdate: false },
+		linkCanvasObject: { triggerUpdate: false },
+		linkDirectionalArrowLength: { default: 0, triggerUpdate: false },
+		linkDirectionalArrowColor: { triggerUpdate: false },
+		linkDirectionalArrowRelPos: { default: 0.5, triggerUpdate: false }, // value between 0<>1 indicating the relative pos along the (exposed) line
+		linkDirectionalParticles: { default: 0 }, // animate photons travelling in the link direction
+		linkDirectionalParticleSpeed: { default: 0.01, triggerUpdate: false }, // in link length ratio per frame
+		linkDirectionalParticleWidth: { default: 4, triggerUpdate: false },
+		linkDirectionalParticleColor: { triggerUpdate: false },
+		globalScale: { default: 1, triggerUpdate: false },
 		d3AlphaDecay: {
 			// default: 0.0228,
 			default: 0.0228,
@@ -107,9 +107,9 @@ export default Kapsule({
 				state.forceLayout.velocityDecay(velocityDecay)
 			}
 		},
-		warmupTicks: {default: 0, triggerUpdate: false}, // how many times to tick the force engine at init before starting to render
-		cooldownTicks: {default: Infinity, triggerUpdate: false},
-		cooldownTime: {default: 15000, triggerUpdate: false}, // ms
+		warmupTicks: { default: 0, triggerUpdate: false }, // how many times to tick the force engine at init before starting to render
+		cooldownTicks: { default: Infinity, triggerUpdate: false },
+		cooldownTime: { default: 15000, triggerUpdate: false }, // ms
 		onLoading: {
 			default: () => {
 			}, triggerUpdate: false
@@ -127,35 +127,35 @@ export default Kapsule({
 			}, triggerUpdate: false
 		},
 		/*原始数据*/
-		originData: {default: {}, triggerUpdate: false},
+		originData: { default: {}, triggerUpdate: false },
 
-		isShadow: {default: false, triggerUpdate: false},
+		isShadow: { default: false, triggerUpdate: false },
 
 		/*平移控制*/
-		translateAnimation: {default: {enable: false}, triggerUpdate: false},
+		translateAnimation: { default: { enable: false }, triggerUpdate: false },
 		/*获取数据*/
 		feedData: {
 			default: () => {
 			}, triggerUpdate: false
 		},
 		/*最右节点*/
-		rightNode: {default: {d: {}}, triggerUpdate: false},
+		rightNode: { default: { d: {} }, triggerUpdate: false },
 
 		/*锚*/
-		anchor: {default: {value: 0}, triggerUpdate: false},
+		anchor: { default: { value: 0 }, triggerUpdate: false },
 		/*删除视窗外的节点后，刷新数据*/
 		refreshData: {
 			default: () => {
 			}, triggerUpdate: false
 		},
 		/*colorTracker同步force-graph*/
-		canvasColorTracker: {default: null, triggerUpdate: false},
+		canvasColorTracker: { default: null, triggerUpdate: false },
 		/*当前点击node的轮盘，color tracker只赋值一次*/
-		changeClickNode:{default:null, triggerUpdate:false},
+		changeClickNode: { default: null, triggerUpdate: false },
 		/*控制轮盘数据*/
-		controlTools:{default:null, triggerUpdate:false},
+		controlTools: { default: null, triggerUpdate: false },
 		// hover轮盘
-		hoverType:{default:null, triggerUpdate:false}
+		hoverType: { default: null, triggerUpdate: false }
 	},
 
 	methods: {
@@ -197,7 +197,6 @@ export default Kapsule({
 					} else {
 						state.forceLayout.tick(); // Tick it
 						state.onEngineTick();
-						clearOutNode(state)
 					}
 				}
 			}
@@ -228,27 +227,37 @@ export default Kapsule({
 
 				ctx.save();
 				state.graphData.nodes.forEach((node, index) => {
-						if (state.nodeCanvasObject) {
-							// Custom node paint
-							state.nodeCanvasObject(node, state.ctx, state.globalScale);
-							return;
-						}
-
-
-						// Draw wider nodes by 1px on shadow canvas for more precise hovering (due to boundary anti-aliasing)
-						const r = Math.sqrt(Math.max(0, getVal(node) || 1)) * state.nodeRelSize + padAmount;
-						node.radius = r
-						ctx.beginPath();
-						ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
-						ctx.fillStyle = getColor(node) || 'rgba(31, 120, 180, 0.92)';
-						ctx.fill();
-						/*节点处于点击状态时绘制轮盘*/
-						if (node.clicked) {
-							// console.log('state.canvasColorTracker: ', state.canvasColorTracker)
-							drawControl(state.ctx, node, state.controlTools, state.isShadow, state.hoverType)
-							state.changeClickNode = false
-						}
+					if (state.nodeCanvasObject) {
+						// Custom node paint
+						state.nodeCanvasObject(node, state.ctx, state.globalScale);
+						return;
 					}
+
+
+					// Draw wider nodes by 1px on shadow canvas for more precise hovering (due to boundary anti-aliasing)
+					const r = Math.sqrt(Math.max(0, getVal(node) || 1)) * state.nodeRelSize + padAmount;
+					node.radius = r
+					ctx.beginPath();
+					ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
+					ctx.fillStyle = getColor(node) || 'rgba(31, 120, 180, 0.92)';
+					ctx.fill();
+
+					if (node.fx != null && node.fy != null) {
+						ctx.save()
+						ctx.beginPath()
+						ctx.arc(node.x, node.y, r + 0.5, 0, Math.PI * 2, false)
+						ctx.strokeStyle = "#FF9800"
+						ctx.lineWidth = 0.5
+						ctx.stroke()
+						ctx.restore()
+					}
+
+					/*节点处于点击状态时绘制轮盘*/
+					if (node.clicked) {
+						drawControl(state.ctx, node, state.controlTools, state.isShadow, state.hoverType)
+						state.changeClickNode = false
+					}
+				}
 				);
 				ctx.restore();
 			}
@@ -442,8 +451,9 @@ export default Kapsule({
 
 	stateInit: () => ({
 		forceLayout: d3ForceSimulation()
-			.force('link', d3ForceLink().distance(60))
-			.force('charge', d3ForceManyBody().strength(-5))
+			.force('link', d3ForceLink().distance(30))
+			.force('charge', d3ForceManyBody().strength(-1))
+			.force('forceManyBody', d3ForceManyBody().strength(-30).distanceMax(20))
 			// .force('center', d3ForceCenter())
 			// .force('radial', d3ForceRadial(200, window.innerWidth/2, window.innerHeight/2, 0))
 			.force('dagRadial', null)
@@ -556,4 +566,4 @@ export default Kapsule({
 		state.onFinishLoading();
 	}
 })
-;
+	;
