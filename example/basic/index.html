@@ -43,11 +43,14 @@
 				axios.get('http://localhost:8080/child/' + n.id).then(req => {
 					req.data.nodes.forEach((node, index) => {
 						if(nodeIdSet.has(node.id)){
-							req.data.nodes.splice(index, 1)
+							delete req.data.nodes[index]
 						}else{
 							nodeIdSet.add(node.id)
 						}
 					})
+
+					req.data.nodes = req.data.nodes.filter(n => n)
+
 					od.nodes.push(...req.data.nodes)
 					od.links.push(...req.data.links)
 					Graph.graphData(od)
