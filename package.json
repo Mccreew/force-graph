@@ -50,6 +50,7 @@
     "d3-zoom": "^1.7.3",
     "index-array-by": "^1.2.2",
     "kapsule": "^1.9.2",
+    "lodash": "^4.17.11",
     "lodash.throttle": "^4.1.1",
     "yarn": "^1.13.0"
   },
