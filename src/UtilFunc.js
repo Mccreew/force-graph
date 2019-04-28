@@ -74,15 +74,6 @@ function setLinkCurvature(links) {
                     }
                 }
             })
-
-            // localLinks = localLinks.filter(l => {
-            //     for (let i = 0; i < tempLinks.length; i++) {
-            //         const tl = tempLinks[i];
-            //         if (_.default.isEqual(l, tl))
-            //             return false
-            //     }
-            //     return true
-            // })
         }
     }
 

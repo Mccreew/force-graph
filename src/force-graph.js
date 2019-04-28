@@ -151,7 +151,14 @@ function onControlCircleClick(state, d, od, clickedNode) {
 			let newLinks = od.links.filter(l => childNodeIds.indexOf(l.source.id) == -1 && childNodeIds.indexOf(l.target.id) == -1)
 			console.log('after filter links: ', newLinks)
 			// 删除有其他联系的子节点的边
-			newLinks = newLinks.filter(l => moreLinkNodeIds.indexOf(l.target.id) == -1 || l.source.id != clickedNode.id)
+			// newLinks = newLinks.filter(l => moreLinkNodeIds.indexOf(l.target.id) == -1 || l.source.id != clickedNode.id)
+			for(let i = 0; i < newLinks.length; i++){
+				if(moreLinkNodeIds.indexOf(newLinks[i].target.id) != -1 && newLinks[i].source.id == clickedNode.id){
+					delete newLinks[i]
+				}
+				console.log(newLinks)
+			}
+			newLinks = newLinks.filter(l => l)
 
 			od.nodes = newNodes
 			od.links = newLinks
