@@ -179,7 +179,6 @@ export default Kapsule({
 			paintLinks();
 			paintArrows();
 			paintPhotons();
-			bounceBack();
 			paintNodes();
 
 			return this;
@@ -201,18 +200,6 @@ export default Kapsule({
 				}
 			}
 
-			/**
-			 * 触碰到顶部和底部返回
-			 */
-			function bounceBack() {
-				state.graphData.nodes.forEach(n => {
-					if (n.y > 550 || n.y < -550) {
-						n.vy = -n.vy + 1
-						n.vx = -n.vx + 1
-						// state.forceLayout.alpha(1)
-					}
-				})
-			}
 
 			function paintNodes() {
 				const getVal = accessorFn(state.nodeVal);
@@ -242,7 +229,6 @@ export default Kapsule({
 					ctx.fillStyle = getColor(node) || 'rgba(31, 120, 180, 0.92)';
 					ctx.fill();
 
-					// TODO 不应该每一帧都计算node的propertyMsg，应当计算一次就行
 					// 显示节点属性
 					ctx.font = 'bold 2px serif'
 					ctx.fillStyle = 'white'
