@@ -242,13 +242,13 @@ export default Kapsule({
 					ctx.fillStyle = getColor(node) || 'rgba(31, 120, 180, 0.92)';
 					ctx.fill();
 
+					// TODO 不应该每一帧都计算node的propertyMsg，应当计算一次就行
 					// 显示节点属性
 					ctx.font = 'bold 2px serif'
 					ctx.fillStyle = 'white'
 					ctx.textBaseline = 'middle'
-					let propertyMsg = node.properties.name
-					let textWidth = ctx.measureText(propertyMsg)
-					ctx.fillText(propertyMsg, node.x - textWidth.width / 2, node.y)
+					let textWidth = ctx.measureText(node.propertyMsg)
+					ctx.fillText(node.propertyMsg, node.x - textWidth.width / 2, node.y)
 
 					if (node.fx != null && node.fy != null) {
 						ctx.save()

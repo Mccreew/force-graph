@@ -10,7 +10,7 @@ import ColorTracker from 'canvas-color-tracker';
 import CanvasForceGraph from './canvas-force-graph';
 import linkKapsule from './kapsule-link.js';
 import { stat } from 'fs';
-import { hasAnotherLink, setLinkCurvature } from './UtilFunc'
+import { hasAnotherLink, setLinkCurvature, setNodePropertyMsg } from './UtilFunc'
 
 const HOVER_CANVAS_THROTTLE_DELAY = 800; // ms to throttle shadow canvas updates for perf improvement
 const ZOOM2NODES_FACTOR = 4;
@@ -187,6 +187,7 @@ export default Kapsule({
 					console.info('force-graph loading', d.nodes.length + ' nodes', d.links.length + ' links');
 					console.log('当前数据: ', d)
 					setLinkCurvature(d.links)
+					setNodePropertyMsg(d.nodes, state.ctx)
 				}
 
 				[{ type: 'Node', objs: d.nodes }, { type: 'Link', objs: d.links }].forEach(hexIndex);
@@ -389,6 +390,7 @@ export default Kapsule({
 		//container.appendChild(state.shadowCanvas);
 
 		const ctx = state.canvas.getContext('2d');
+		state.ctx = ctx
 		const shadowCtx = state.shadowCanvas.getContext('2d');
 
 		// Setup node drag interaction

@@ -100,4 +100,31 @@ function setLinkCurvature(links) {
     })
 }
 
-export { getLinkCount, hasAnotherLink, setLinkCurvature }
+/**
+ * 设置node的propertyMsg
+ * @param {*} nodes 
+ * @param {*} canvasCtx 
+ */
+function setNodePropertyMsg(nodes, canvasCtx) {
+    let maxWidth = 30
+    nodes.forEach(n => {
+        let msg = n.properties.name
+        if(msg == 'CybereasOn'){
+            console.log(n)
+        }
+        if (canvasCtx.measureText(msg).width > maxWidth) {
+            let i = msg.length - 1
+            while (canvasCtx.measureText(msg).width > maxWidth && i > 0) {
+                msg = msg.slice(0, i)
+                i--
+            }
+            msg += '...'
+        }
+        n.propertyMsg = msg
+    })
+}
+
+export {getLinkCount, 
+        hasAnotherLink, 
+        setLinkCurvature, 
+        setNodePropertyMsg}
