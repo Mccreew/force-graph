@@ -230,11 +230,15 @@ export default Kapsule({
 					ctx.fill();
 
 					// 显示节点属性
-					ctx.font = 'bold 2px serif'
-					ctx.fillStyle = 'white'
-					ctx.textBaseline = 'middle'
-					let textWidth = ctx.measureText(node.propertyMsg)
-					ctx.fillText(node.propertyMsg, node.x - textWidth.width / 2, node.y)
+					// shadow canvas时不绘制文字，避免点击文字不能响应点击节点的事件
+					if (!state.isShadow) {
+						ctx.font = 'bold 2px serif'
+						ctx.fillStyle = 'white'
+						ctx.textBaseline = 'middle'
+						let textWidth = ctx.measureText(node.propertyMsg)
+						ctx.fillText(node.propertyMsg, node.x - textWidth.width / 2, node.y)
+					}
+
 
 					if (node.fx != null && node.fy != null) {
 						ctx.save()
