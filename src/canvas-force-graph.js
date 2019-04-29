@@ -179,7 +179,6 @@ export default Kapsule({
 			paintLinks();
 			paintArrows();
 			paintPhotons();
-			bounceBack();
 			paintNodes();
 
 			return this;
@@ -201,18 +200,6 @@ export default Kapsule({
 				}
 			}
 
-			/**
-			 * 触碰到顶部和底部返回
-			 */
-			function bounceBack() {
-				state.graphData.nodes.forEach(n => {
-					if (n.y > 550 || n.y < -550) {
-						n.vy = -n.vy + 1
-						n.vx = -n.vx + 1
-						// state.forceLayout.alpha(1)
-					}
-				})
-			}
 
 			function paintNodes() {
 				const getVal = accessorFn(state.nodeVal);
@@ -241,6 +228,17 @@ export default Kapsule({
 					ctx.arc(node.x, node.y, r, 0, 2 * Math.PI, false);
 					ctx.fillStyle = getColor(node) || 'rgba(31, 120, 180, 0.92)';
 					ctx.fill();
+
+					// 显示节点属性
+					// shadow canvas时不绘制文字，避免点击文字不能响应点击节点的事件
+					if (!state.isShadow) {
+						ctx.font = 'bold 2px serif'
+						ctx.fillStyle = 'white'
+						ctx.textBaseline = 'middle'
+						let textWidth = ctx.measureText(node.propertyMsg)
+						ctx.fillText(node.propertyMsg, node.x - textWidth.width / 2, node.y)
+					}
+
 
 					if (node.fx != null && node.fy != null) {
 						ctx.save()
