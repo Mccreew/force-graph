@@ -106,12 +106,16 @@ function setLinkCurvature(links) {
  * @param {*} canvasCtx 
  */
 function setNodePropertyMsg(nodes, canvasCtx) {
-    let maxWidth = 30
+    canvasCtx.save()
+    canvasCtx.font = 'bold 2px serif'
+
+    let maxWidth = 6
     nodes.forEach(n => {
-        let msg = n.properties.name
-        if(msg == 'CybereasOn'){
-            console.log(n)
+        if (n.propertyMsg) {
+            return
         }
+        let msg = n.properties.name
+
         if (canvasCtx.measureText(msg).width > maxWidth) {
             let i = msg.length - 1
             while (canvasCtx.measureText(msg).width > maxWidth && i > 0) {
@@ -121,10 +125,15 @@ function setNodePropertyMsg(nodes, canvasCtx) {
             msg += '...'
         }
         n.propertyMsg = msg
+
+        n.textWidth = canvasCtx.measureText(n.propertyMsg).width
     })
+    canvasCtx.restore()
 }
 
-export {getLinkCount, 
-        hasAnotherLink, 
-        setLinkCurvature, 
-        setNodePropertyMsg}
+export {
+    getLinkCount,
+    hasAnotherLink,
+    setLinkCurvature,
+    setNodePropertyMsg
+}

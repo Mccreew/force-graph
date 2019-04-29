@@ -235,8 +235,7 @@ export default Kapsule({
 						ctx.font = 'bold 2px serif'
 						ctx.fillStyle = 'white'
 						ctx.textBaseline = 'middle'
-						let textWidth = ctx.measureText(node.propertyMsg)
-						ctx.fillText(node.propertyMsg, node.x - textWidth.width / 2, node.y)
+						ctx.fillText(node.propertyMsg, node.x - node.textWidth / 2, node.y)
 					}
 
 
