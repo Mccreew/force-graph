@@ -242,6 +242,14 @@ export default Kapsule({
 					ctx.fillStyle = getColor(node) || 'rgba(31, 120, 180, 0.92)';
 					ctx.fill();
 
+					// 显示节点属性
+					ctx.font = 'bold 2px serif'
+					ctx.fillStyle = 'white'
+					ctx.textBaseline = 'middle'
+					let propertyMsg = node.properties.name
+					let textWidth = ctx.measureText(propertyMsg)
+					ctx.fillText(propertyMsg, node.x - textWidth.width / 2, node.y)
+
 					if (node.fx != null && node.fy != null) {
 						ctx.save()
 						ctx.beginPath()
