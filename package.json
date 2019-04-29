@@ -52,6 +52,7 @@
     "kapsule": "^1.9.2",
     "lodash": "^4.17.11",
     "lodash.throttle": "^4.1.1",
+    "semantic-ui": "^2.4.2",
     "yarn": "^1.13.0"
   },
   "devDependencies": {

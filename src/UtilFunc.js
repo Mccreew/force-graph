@@ -109,7 +109,7 @@ function setNodePropertyMsg(nodes, canvasCtx) {
     canvasCtx.save()
     canvasCtx.font = 'bold 2px serif'
 
-    let maxWidth = 6
+    let maxWidth = 8
     nodes.forEach(n => {
         if (n.propertyMsg) {
             return

@@ -72,11 +72,11 @@
 			let insideData = new Object()
 			insideData = Object.assign(insideData, data)
 
-			insideData.nodes = insideData.nodes.filter(n => {
-				return n.properties.layer === 0;
-			})
+			// insideData.nodes = insideData.nodes.filter(n => {
+			// 	return n.properties.layer === 0;
+			// })
 
-			insideData.links = []
+			// insideData.links = []
 
 
 			Graph.originData(insideData)
