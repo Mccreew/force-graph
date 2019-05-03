@@ -15,7 +15,6 @@ import indexBy from 'index-array-by';
 import { autoColorObjects } from './color-utils';
 import getDagDepths from './dagDepths';
 
-import { schemePaired } from 'd3-scale-chromatic';
 
 import drawControl from './drawControl'
 
@@ -155,7 +154,7 @@ export default Kapsule({
 		/*控制轮盘数据*/
 		controlTools: { default: null, triggerUpdate: false },
 		// hover轮盘
-		hoverType: { default: null, triggerUpdate: false }
+		hoverType: { default: null, triggerUpdate: false },
 	},
 
 	methods: {
@@ -220,6 +219,10 @@ export default Kapsule({
 						return;
 					}
 
+					if (!node.show) {
+						return
+					}
+
 
 					// Draw wider nodes by 1px on shadow canvas for more precise hovering (due to boundary anti-aliasing)
 					const r = Math.sqrt(Math.max(0, getVal(node) || 1)) * state.nodeRelSize + padAmount;
@@ -260,6 +263,7 @@ export default Kapsule({
 			}
 
 			function paintLinks() {
+
 				const getVisibility = accessorFn(state.linkVisibility);
 				const getColor = accessorFn(state.linkColor);
 				const getWidth = accessorFn(state.linkWidth);
@@ -291,6 +295,11 @@ export default Kapsule({
 						links.forEach(link => {
 							const start = link.source;
 							const end = link.target;
+
+
+							if (!link.show) {
+								return
+							}
 							if (!start.hasOwnProperty('x') || !end.hasOwnProperty('x')) return; // skip invalid link
 
 							const curvature = getCurvature(link);
@@ -346,6 +355,11 @@ export default Kapsule({
 
 				ctx.save();
 				state.graphData.links.filter(getVisibility).forEach(link => {
+
+					if (!link.show) {
+						return
+					}
+
 					const arrowLength = getLength(link);
 					if (!arrowLength || arrowLength < 0) return;
 
@@ -466,18 +480,6 @@ export default Kapsule({
 
 	update(state) {
 
-		/*自动增加颜色*/
-		state.graphData.nodes.forEach(n => {
-			if (!n.color) {
-				n.color = schemePaired[n.group % 12]
-			}
-		})
-		state.graphData.links.forEach(l => {
-			if (!l.color) {
-				l.color = schemePaired[l.group % 12]
-			}
-		})
-
 
 		state.engineRunning = false; // Pause simulation
 		state.onLoading();
@@ -511,6 +513,15 @@ export default Kapsule({
 			.stop()
 			.alpha(1) // re-heat the simulation
 			.nodes(state.graphData.nodes);
+
+		// 边的两个节点都可见，边才可见，否则show为false
+		state.graphData.links.forEach(l => {
+			if(l.source.show && l.target.show){
+				l.show = true
+			}else{
+				l.show = false
+			}
+		})
 
 		// add links (if link force is still active)
 		const linkForce = state.forceLayout.force('link');
