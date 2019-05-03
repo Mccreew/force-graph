@@ -107,9 +107,9 @@ function setLinkCurvature(links) {
  */
 function setNodePropertyMsg(nodes, canvasCtx) {
     canvasCtx.save()
-    canvasCtx.font = 'bold 2px serif'
+    canvasCtx.font = '2px serif'
 
-    let maxWidth = 8
+    let maxWidth = 6
     nodes.forEach(n => {
         if (n.propertyMsg) {
             return

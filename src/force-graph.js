@@ -10,6 +10,7 @@ import ColorTracker from 'canvas-color-tracker';
 import CanvasForceGraph from './canvas-force-graph';
 import linkKapsule from './kapsule-link.js';
 import { stat } from 'fs';
+import { schemePaired } from 'd3-scale-chromatic';
 import { hasAnotherLink, setLinkCurvature, setNodePropertyMsg } from './UtilFunc'
 
 const HOVER_CANVAS_THROTTLE_DELAY = 800; // ms to throttle shadow canvas updates for perf improvement
@@ -47,7 +48,7 @@ const linkedProps = Object.assign(
 		'rightNode',
 		'onEngineStop',
 		'originData',
-		'canvasColorTracker'
+		'canvasColorTracker',
 	].map(p => ({ [p]: bindFG.linkProp(p) })),
 	...[
 		'nodeRelSize',
@@ -152,11 +153,10 @@ function onControlCircleClick(state, d, od, clickedNode) {
 			console.log('after filter links: ', newLinks)
 			// 删除有其他联系的子节点的边
 			// newLinks = newLinks.filter(l => moreLinkNodeIds.indexOf(l.target.id) == -1 || l.source.id != clickedNode.id)
-			for(let i = 0; i < newLinks.length; i++){
-				if(moreLinkNodeIds.indexOf(newLinks[i].target.id) != -1 && newLinks[i].source.id == clickedNode.id){
+			for (let i = 0; i < newLinks.length; i++) {
+				if (moreLinkNodeIds.indexOf(newLinks[i].target.id) != -1 && newLinks[i].source.id == clickedNode.id) {
 					delete newLinks[i]
 				}
-				console.log(newLinks)
 			}
 			newLinks = newLinks.filter(l => l)
 
@@ -185,9 +185,37 @@ export default Kapsule({
 			onChange: ((d, state) => {
 				if (d.nodes.length || d.links.length) {
 					console.info('force-graph loading', d.nodes.length + ' nodes', d.links.length + ' links');
-					console.log('当前数据: ', d)
 					setLinkCurvature(d.links)
 					setNodePropertyMsg(d.nodes, state.ctx)
+
+					/*自动增加颜色*/
+					d.nodes.forEach(n => {
+						if (!n.color) {
+							n.color = schemePaired[n.group % 12]
+						}
+						if (!n.hasOwnProperty('show')) {
+							n.show = true
+						}
+					})
+					d.links.forEach(l => {
+						if (!l.color) {
+							l.color = schemePaired[l.group % 12]
+						}
+						if (!l.hasOwnProperty('show')) {
+							l.show = true
+						}
+					})
+					if(state.invisiableColor){
+						console.log('state.invisiableColor: ', state.invisiableColor)
+						d.nodes.forEach(n => {
+							if(state.invisiableColor.indexOf(n.color) != -1){
+								n.show = false
+							}
+						})
+					}
+
+					state.onDataChange(d)
+					console.log(state)
 				}
 
 				[{ type: 'Node', objs: d.nodes }, { type: 'Link', objs: d.links }].forEach(hexIndex);
@@ -251,6 +279,14 @@ export default Kapsule({
 		},
 		onControlCircleClick: {
 			default: () => { }, triggerUpdate: false
+		},
+		onDataChange: {
+			default: () => { },
+			triggerUpdate: false
+		},
+		invisiableColor: {
+			default: null,
+			triggerUpdate: false
 		},
 		// firstClick:{default:false, triggerUpdate: false},
 		...linkedProps
@@ -375,6 +411,7 @@ export default Kapsule({
 		// Container anchor for canvas and tooltip
 		const container = document.createElement('div');
 		container.style.position = 'relative';
+		container.style.padding = 0
 		domNode.appendChild(container);
 
 		state.canvas = document.createElement('canvas');
