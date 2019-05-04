@@ -17,6 +17,7 @@ import getDagDepths from './dagDepths';
 
 
 import drawControl from './drawControl'
+import {setLinkCurvature} from './UtilFunc'
 
 //
 
@@ -514,14 +515,23 @@ export default Kapsule({
 			.alpha(1) // re-heat the simulation
 			.nodes(state.graphData.nodes);
 
+		/** 通过添加到forceLayout后，
+		 * link.source:''
+		 * 变为
+		 * link.source:{
+		 * 			id:''
+		 * 			...
+		 * 			} 
+		 * */
 		// 边的两个节点都可见，边才可见，否则show为false
 		state.graphData.links.forEach(l => {
-			if(l.source.show && l.target.show){
+			if (l.source.show && l.target.show) {
 				l.show = true
-			}else{
+			} else {
 				l.show = false
 			}
 		})
+		setLinkCurvature(state.graphData.links)
 
 		// add links (if link force is still active)
 		const linkForce = state.forceLayout.force('link');

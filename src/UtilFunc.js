@@ -131,9 +131,48 @@ function setNodePropertyMsg(nodes, canvasCtx) {
     canvasCtx.restore()
 }
 
+/**
+ * 清楚重复的Link
+ * @param {*} links 
+ */
+function filterDuplicateLink(links) {
+    for (let i = 0; i < links.length; i++) {
+        if(!links[i]){
+            continue
+        }
+        let { source, target, type, properties, group } = links[i]
+        let base = {
+            source_id: typeof (source) == 'object' ? source.id : source,
+            target_id: typeof (target) == 'object' ? target.id : target,
+            type: type,
+            properties: properties,
+            group: group
+        }
+        for (let j = i + 1; j < links.length; j++) {
+            if(!links[j]){
+                continue
+            }
+            let { source, target, type, properties, group } = links[j]
+            let compare = {
+                source_id: typeof (source) == 'object' ? source.id : source,
+                target_id: typeof (target) == 'object' ? target.id : target,
+                type: type,
+                properties: properties,
+                group: group
+            }
+            if (_.default.isEqual(base, compare)) {
+                delete links[j]
+            }
+        }
+    }
+    links = links.filter(l => l)
+    return links
+}
+
 export {
     getLinkCount,
     hasAnotherLink,
     setLinkCurvature,
-    setNodePropertyMsg
+    setNodePropertyMsg,
+    filterDuplicateLink
 }

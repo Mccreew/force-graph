@@ -8,7 +8,6 @@ Object.defineProperty(graphInfo, 'data', {
     },
     set: function (value) {
         data = value
-        console.log('set')
         ButtonVisual(data)
     }
 })
@@ -37,6 +36,7 @@ const Graph = ForceGraph()
             })
 
             req.data.nodes = req.data.nodes.filter(n => n)
+            req.data.links = filterDuplicateLink(od.links, req.data.links)
 
             od.nodes.push(...req.data.nodes)
             od.links.push(...req.data.links)
@@ -68,3 +68,37 @@ axios.get(requestUrl).then(req => {
     Graph.graphData(insideData)
 })
 
+
+function filterDuplicateLink(odLinks, comingLinks) {
+    for (let i = 0; i < comingLinks.length; i++) {
+        if(!comingLinks[i]){
+            continue
+        }
+        let { source, target, type, properties, group } = comingLinks[i]
+        let base = {
+            source_id: typeof (source) == 'object' ? source.id : source,
+            target_id: typeof (target) == 'object' ? target.id : target,
+            type: type,
+            properties: properties,
+            group: group
+        }
+        for (let j = 0 ; j < odLinks.length; j++) {
+            if(!odLinks[j]){
+                continue
+            }
+            let { source, target, type, properties, group } = odLinks[j]
+            let compare = {
+                source_id: typeof (source) == 'object' ? source.id : source,
+                target_id: typeof (target) == 'object' ? target.id : target,
+                type: type,
+                properties: properties,
+                group: group
+            }
+            if (_.isEqual(base, compare)) {
+                delete comingLinks[i]
+            }
+        }
+    }
+    let links = comingLinks.filter(l => l)
+    return links
+}

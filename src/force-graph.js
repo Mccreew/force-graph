@@ -11,7 +11,7 @@ import CanvasForceGraph from './canvas-force-graph';
 import linkKapsule from './kapsule-link.js';
 import { stat } from 'fs';
 import { schemePaired } from 'd3-scale-chromatic';
-import { hasAnotherLink, setLinkCurvature, setNodePropertyMsg } from './UtilFunc'
+import { hasAnotherLink, setLinkCurvature, setNodePropertyMsg, filterDuplicateLink } from './UtilFunc'
 
 const HOVER_CANVAS_THROTTLE_DELAY = 800; // ms to throttle shadow canvas updates for perf improvement
 const ZOOM2NODES_FACTOR = 4;
@@ -183,9 +183,10 @@ export default Kapsule({
 		graphData: {
 			default: { nodes: [], links: [] },
 			onChange: ((d, state) => {
+
 				if (d.nodes.length || d.links.length) {
 					console.info('force-graph loading', d.nodes.length + ' nodes', d.links.length + ' links');
-					setLinkCurvature(d.links)
+					
 					setNodePropertyMsg(d.nodes, state.ctx)
 
 					/*自动增加颜色*/
@@ -197,13 +198,14 @@ export default Kapsule({
 							n.show = true
 						}
 					})
-					d.links.forEach(l => {
+					d.links.forEach((l,index) => {
 						if (!l.color) {
 							l.color = schemePaired[l.group % 12]
 						}
 						if (!l.hasOwnProperty('show')) {
 							l.show = true
 						}
+						l.index = index
 					})
 					if(state.invisiableColor){
 						console.log('state.invisiableColor: ', state.invisiableColor)
@@ -215,7 +217,6 @@ export default Kapsule({
 					}
 
 					state.onDataChange(d)
-					console.log(state)
 				}
 
 				[{ type: 'Node', objs: d.nodes }, { type: 'Link', objs: d.links }].forEach(hexIndex);
@@ -406,7 +407,6 @@ export default Kapsule({
 		state.shadowGraph.canvasColorTracker(state.colorTracker)
 		// console.log('state.forceGraph: ', state.forceGraph)
 		// console.log('state.canvasColorTracker: ', state.canvasColorTracker)
-		console.log('state.colorTracker: ', state.colorTracker)
 
 		// Container anchor for canvas and tooltip
 		const container = document.createElement('div');
