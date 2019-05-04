@@ -26,22 +26,18 @@
 </head>
 
 <body>
-    <div style="width:1800px; height:50px; margin-left: 52.5; padding: 3px" id="categoryButton">
+    <div style="width:1800px; height:50px; margin-left: 52.5; margin-top: 8px;" id="categoryButton">
         <div>
-            <button class="ui button mini" 
-                :style="{'background-color':item.show ? item.color : '', color:'white'}"
-                v-for='(item, index) in nodeCategoryArr'
-                @click='nodeButtonClick(item)'>
+            <a class="ui large label" @click='nodeButtonClick(item)' v-for='(item, index) in nodeCategoryArr'
+                :style="{'background-color':item.show ? item.color+'!important' : '', 'border-color':item.show ? item.color+'!important' : '', color:'white!important'}">
                 {{item.category}}
-            </button>
+            </a>
         </div>
 
-        <div>
-            <button class="ui basic button mini" :style="{color:item.show ? item.color+'!important' : ''}"
-                v-for='(item, index) in linkTypeArr'
-                @click='linkButtonClick(item)'>
-                {{item.type}}
-            </button>
+        <div style="margin-top: 3px;">
+            <a class="ui basic label"
+                :style="{'border-color':item.show ? item.color+'!important' : '', color:item.show ? item.color+'!important' : '' }"
+                v-for='(item, index) in linkTypeArr' @click='linkButtonClick(item)'> {{item.type}}</a>
         </div>
     </div>
     <div id="graph" style="width:1800px; height:800px;" class="ui card centered grid">
