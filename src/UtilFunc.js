@@ -19,9 +19,9 @@ function getLinkCount(nodeId, links) {
 
 /**
  * node是否有和targetNode以外的边的联系
- * @param {*} nodeId 
- * @param {*} links 
- * @param {*} targetNodeId 
+ * @param {*} nodeId
+ * @param {*} links
+ * @param {*} targetNodeId
  */
 function hasAnotherLink(nodeId, links, targetNodeId) {
     let flag = false
@@ -37,12 +37,19 @@ function hasAnotherLink(nodeId, links, targetNodeId) {
 
 /**
  * 设置边的曲率
- * @param {*} links 
+ * @param {*} links
  */
 function setLinkCurvature(links) {
+    // let setLinkCurvatureWorker = new Worker('../src/setLinkCurvatureWorker.js')
+    // setLinkCurvatureWorker.postMessage(links)
+    // setLinkCurvatureWorker.onmessage = function (e) {
+    //     console.log('setLinkCurvature finish')
+    //     setLinkCurvatureWorker.terminate()
+    //     callback(e.data)
+    // }
     // 复制本地数组
     let localLinks = [...links]
-    // 筛选出多个拥有同一source和target的边    
+    // 筛选出多个拥有同一source和target的边
     let multyLinks = []
 
 
@@ -53,14 +60,25 @@ function setLinkCurvature(links) {
         }
         // 相同source，target的一组边
         let tempLinks = []
-        let baseLink = localLinks[i]
+        let { source, target } = localLinks[i]
+        let baseLink = {
+            source_id: typeof (source) == 'object' ? source.id : source,
+            target_id: typeof (target) == 'object' ? target.id : target
+        }
         for (let j = 0; j < localLinks.length; j++) {
-            let compareLink = localLinks[j]
+            if(!localLinks[j]){
+                continue
+            }
+            let { source, target } = localLinks[j]
+            let compareLink = {
+                source_id: typeof (source) == 'object' ? source.id : source,
+                target_id: typeof (target) == 'object' ? target.id : target
+            }
             if (!compareLink) {
                 continue
             }
-            if (_.default.isEqual(compareLink.source, baseLink.source) && _.default.isEqual(compareLink.target, baseLink.target)) {
-                tempLinks.push(compareLink)
+            if (_.default.isEqual(compareLink, baseLink)) {
+                tempLinks.push(localLinks[j])
             }
         }
         // 相同source和target的边不止有一条
@@ -102,8 +120,8 @@ function setLinkCurvature(links) {
 
 /**
  * 设置node的propertyMsg
- * @param {*} nodes 
- * @param {*} canvasCtx 
+ * @param {*} nodes
+ * @param {*} canvasCtx
  */
 function setNodePropertyMsg(nodes, canvasCtx) {
     canvasCtx.save()
@@ -133,11 +151,11 @@ function setNodePropertyMsg(nodes, canvasCtx) {
 
 /**
  * 清楚重复的Link
- * @param {*} links 
+ * @param {*} links
  */
 function filterDuplicateLink(links) {
     for (let i = 0; i < links.length; i++) {
-        if(!links[i]){
+        if (!links[i]) {
             continue
         }
         let { source, target, type, properties, group } = links[i]
@@ -149,7 +167,7 @@ function filterDuplicateLink(links) {
             group: group
         }
         for (let j = i + 1; j < links.length; j++) {
-            if(!links[j]){
+            if (!links[j]) {
                 continue
             }
             let { source, target, type, properties, group } = links[j]

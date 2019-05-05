@@ -118,7 +118,7 @@ function clearCanvas(ctx, width, height) {
 
 /**
  * 点击轮盘
- * @param {*} state 
+ * @param {*} state
  * @param {*} d state.hoverObj.d
  * @param {*} od origin data
  * @param {*} clickedNode 点击的节点
@@ -186,7 +186,8 @@ export default Kapsule({
 
 				if (d.nodes.length || d.links.length) {
 					console.info('force-graph loading', d.nodes.length + ' nodes', d.links.length + ' links');
-					
+
+					// setLinkCurvature(d.links)
 					setNodePropertyMsg(d.nodes, state.ctx)
 
 					/*自动增加颜色*/
@@ -198,7 +199,7 @@ export default Kapsule({
 							n.show = true
 						}
 					})
-					d.links.forEach((l,index) => {
+					d.links.forEach((l, index) => {
 						if (!l.color) {
 							l.color = schemePaired[l.group % 12]
 						}
@@ -207,10 +208,10 @@ export default Kapsule({
 						}
 						l.index = index
 					})
-					if(state.invisiableColor){
+					if (state.invisiableColor) {
 						console.log('state.invisiableColor: ', state.invisiableColor)
 						d.nodes.forEach(n => {
-							if(state.invisiableColor.indexOf(n.color) != -1){
+							if (state.invisiableColor.indexOf(n.color) != -1) {
 								n.show = false
 							}
 						})

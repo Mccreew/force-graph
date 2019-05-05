@@ -1,4 +1,7 @@
-let requestUrl = 'http://localhost:8080/data/1'
+// let requestUrl = 'http://localhost:8080/data/1/5'
+let requestUrl = 'http://localhost:8080/data/1/software/1'
+
+let worker = new Worker('./worker.js')
 // let requestUrl = 'http://localhost:8080/node/1304535'
 
 let graphInfo = { data: {} };
@@ -28,20 +31,26 @@ const Graph = ForceGraph()
         })
 
         axios.get('http://localhost:8080/child/' + n.id).then(req => {
-            req.data.nodes.forEach((node, index) => {
-                if (nodeIdSet.has(node.id)) {
-                    delete req.data.nodes[index]
-                } else {
-                    nodeIdSet.add(node.id)
-                }
+
+            // req.data.links = filterDuplicateLink(od.links, req.data.links)
+
+            filterDuplicateLinkWorker(od.links, req.data.links, function updateGraph(newLink){
+                console.log(newLink)
+                req.data.nodes.forEach((node, index) => {
+                    if (nodeIdSet.has(node.id)) {
+                        delete req.data.nodes[index]
+                    } else {
+                        nodeIdSet.add(node.id)
+                    }
+                })
+
+                req.data.nodes = req.data.nodes.filter(n => n)
+                od.nodes.push(...req.data.nodes)
+                od.links.push(...newLink)
+                updateGraphAfterSetLinkCurvature(od)
+                // Graph.graphData(od)
             })
 
-            req.data.nodes = req.data.nodes.filter(n => n)
-            req.data.links = filterDuplicateLink(od.links, req.data.links)
-
-            od.nodes.push(...req.data.nodes)
-            od.links.push(...req.data.links)
-            Graph.graphData(od)
         })
 
     })
@@ -72,41 +81,36 @@ axios.get(requestUrl).then(req => {
     data = req.data
     let insideData = new Object()
     insideData = Object.assign(insideData, data)
-    Graph.originData(insideData)
-    Graph.graphData(insideData)
+    updateGraphAfterSetLinkCurvature(data)
 })
 
+/**
+ * webWorker 过滤重复的边
+ * @param {*} od 图中已有的数据
+ * @param {*} comming 即将新添的数据
+ * @param {*} callback 回调
+ */
+function filterDuplicateLinkWorker(od, comming, callback) {
+        worker.postMessage({od, comming})
 
-function filterDuplicateLink(odLinks, comingLinks) {
-    for (let i = 0; i < comingLinks.length; i++) {
-        if(!comingLinks[i]){
-            continue
+        worker.onmessage = function (event) {
+            // console.log('主线程收到的消息： ', event.data)
+            comming = event.data
+            callback(comming)
         }
-        let { source, target, type, properties, group } = comingLinks[i]
-        let base = {
-            source_id: typeof (source) == 'object' ? source.id : source,
-            target_id: typeof (target) == 'object' ? target.id : target,
-            type: type,
-            properties: properties,
-            group: group
-        }
-        for (let j = 0 ; j < odLinks.length; j++) {
-            if(!odLinks[j]){
-                continue
-            }
-            let { source, target, type, properties, group } = odLinks[j]
-            let compare = {
-                source_id: typeof (source) == 'object' ? source.id : source,
-                target_id: typeof (target) == 'object' ? target.id : target,
-                type: type,
-                properties: properties,
-                group: group
-            }
-            if (_.isEqual(base, compare)) {
-                delete comingLinks[i]
-            }
-        }
+}
+
+/**
+ * 在设置边的曲率之后更新图
+ * @param {*} data 添加到图中的数据
+ */
+function updateGraphAfterSetLinkCurvature(data){
+    let linkCurvatureWorker = new Worker('./setLinkCurvatureWorker.js')
+    linkCurvatureWorker.postMessage(data.links)
+    linkCurvatureWorker.onmessage = e => {
+        console.log('设置边的曲率完成，刷新图')
+        data.links = e.data
+        Graph.originData(data)
+        Graph.graphData(data)
     }
-    let links = comingLinks.filter(l => l)
-    return links
 }
