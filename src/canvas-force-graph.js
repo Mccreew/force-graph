@@ -514,6 +514,15 @@ export default Kapsule({
 			.alpha(1) // re-heat the simulation
 			.nodes(state.graphData.nodes);
 
+		/** 通过添加到forceLayout后，
+		 * link.source:''
+		 * 变为
+		 * link.source:{
+		 * 			id:''
+		 * 			...
+		 * 			}
+		 * */
+
 		// 边的两个节点都可见，边才可见，否则show为false
 		state.graphData.links.forEach(l => {
 			if(l.source.show && l.target.show){

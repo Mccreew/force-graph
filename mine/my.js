@@ -17,6 +17,45 @@ let categoryButton = new Vue({
         }
     }
 })
+
+// 显示hover信息
+let hoverInfo = new Vue({
+    el:'#hoverInfo',
+    data:{
+        type:'',
+        properties:{},
+        id:'',
+        isLink:false,
+        color:'',
+        show:false
+    },
+    computed:{
+        styleObject(){
+            return {
+                'border-color':this.color + '!important',
+                'background-color':this.isLink ? '' : this.color + '!important',
+                color:this.isLink ? this.color + '!important' : 'white!important'
+            }
+        }
+    }
+})
+
+function showHoverInfo(data){
+    if(!data){
+        return
+    }
+    if(!hoverInfo.type){
+        hoverInfo.show = false
+    }
+    hoverInfo.show = true
+    hoverInfo.isLink = data.hasOwnProperty('type')
+    hoverInfo.type = data.type ? data.type : data.category
+    hoverInfo.properties = {}
+    Object.assign(hoverInfo.properties, data.properties)
+    hoverInfo.id = data.id
+    hoverInfo.color = data.color
+}
+
 function ButtonVisual(graphData) {
     graphData_My = graphData
     // 筛选node和link类别
@@ -27,8 +66,8 @@ function ButtonVisual(graphData) {
 
 /**
  * 判断数组是否存在object,返回所在的索引
- * @param {*} arr 
- * @param {*} object 
+ * @param {*} arr
+ * @param {*} object
  */
 function existObject(arr, object) {
     for (let i = 0; i < arr.length; i++) {
@@ -41,8 +80,8 @@ function existObject(arr, object) {
 
 /**
  * 筛选graphData中node和link的类别
- * @param {*} graphData 
- * @param {*} vueInstance 
+ * @param {*} graphData
+ * @param {*} vueInstance
  */
 function filterNodeAndLinkType(graphData, vueInstance) {
     let newNodeCategorys = vueInstance.nodeCategoryArr.map(n => n.category)

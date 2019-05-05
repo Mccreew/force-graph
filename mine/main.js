@@ -13,9 +13,10 @@ Object.defineProperty(graphInfo, 'data', {
     }
 })
 const Graph = ForceGraph()
-    (document.getElementById('graph')).linkCurvature('curvature').width(1800).height(800)
+    (document.getElementById('graph')).linkCurvature('curvature').width(1800).height(780)
     // .linkDirectionalParticles(2))
     .onNodeClick((n, od) => {
+        showHoverInfo(n)
         console.log(n)
         if (n.expand) {
             return
@@ -46,6 +47,7 @@ const Graph = ForceGraph()
     })
     .onLinkClick(l => {
         console.log(l)
+        showHoverInfo(l)
     })
     .linkDirectionalArrowLength(4)
     .onControlCircleClick((d, od, clickNode) => {
@@ -56,6 +58,12 @@ const Graph = ForceGraph()
         // Object.assign(temp, data)
         graphInfo.data = data
         //    console.log(graphInfo)
+    })
+    .onNodeHover(n => {
+        showHoverInfo(n)
+    })
+    .onLinkHover(l => {
+        showHoverInfo(l)
     })
 
 
