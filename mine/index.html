@@ -26,7 +26,7 @@
 </head>
 
 <body>
-    <div style="width:1800px; height:50px; margin-left: 52.5; margin-top: 8px;" id="categoryButton">
+    <div style="height:50px; margin-left: 52.5; margin-top: 3px;" id="categoryButton">
         <div>
             <a class="ui large label" @click='nodeButtonClick(item)' v-for='(item, index) in nodeCategoryArr'
                 :style="{'background-color':item.show ? item.color+'!important' : '', 'border-color':item.show ? item.color+'!important' : '', color:'white!important'}">
@@ -36,12 +36,31 @@
 
         <div style="margin-top: 3px;">
             <a class="ui basic label"
+                style="pointer-events: none;"
                 :style="{'border-color':item.show ? item.color+'!important' : '', color:item.show ? item.color+'!important' : '' }"
                 v-for='(item, index) in linkTypeArr' @click='linkButtonClick(item)'> {{item.type}}</a>
         </div>
-    </div>
-    <div id="graph" style="width:1800px; height:800px;" class="ui card centered grid">
+        <!-- <div style="margin-right:20;position: absolute;"> -->
 
+        <!-- </div> -->
+    </div>
+
+    <div id="graph" style="width:1800px; height:780px;" class="ui card centered grid">
+
+    </div>
+    <div style="margin-left:52.5px; line-height: 20pt" id="hoverInfo" v-show='show'>
+
+            <a style="display:inline" class="ui label" :class="{basic: isLink ? 'basic' : ''}"
+                :style='styleObject'>{{type}}</a>
+        <span>
+                <a class="ui label"> ID <div class="detail" style="color:black">{{id}}</div>
+                </a>
+            <span>
+                <span v-for='(v, k) in properties'>
+                    <span style="font-weight: bold"> {{k}}</span>: <span style="color:#797D7F">{{v}}</span>
+                </span>
+            </span>
+        </span>
     </div>
 </body>
 <script src="main.js"></script>

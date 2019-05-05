@@ -521,8 +521,14 @@ export default Kapsule({
 		 * link.source:{
 		 * 			id:''
 		 * 			...
+<<<<<<< HEAD
 		 * 			} 
 		 * */
+=======
+		 * 			}
+		 * */
+
+>>>>>>> visual
 		// 边的两个节点都可见，边才可见，否则show为false
 		state.graphData.links.forEach(l => {
 			if (l.source.show && l.target.show) {
