@@ -532,7 +532,7 @@ export default Kapsule({
 				l.show = false
 			}
 		})
-		setLinkCurvature(state.graphData.links)
+		// setLinkCurvature(state.graphData.links)
 
 		// add links (if link force is still active)
 		const linkForce = state.forceLayout.force('link');
