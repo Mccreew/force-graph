@@ -28,6 +28,10 @@ const Graph = ForceGraph()
         })
 
         axios.get('http://localhost:8080/child/' + n.id).then(req => {
+            if(req.data.nodes.length == 0 || req.data.links.length == 0){
+                return
+            }
+
             req.data.nodes.forEach((node, index) => {
                 if (nodeIdSet.has(node.id)) {
                     delete req.data.nodes[index]
@@ -37,11 +41,12 @@ const Graph = ForceGraph()
             })
 
             req.data.nodes = req.data.nodes.filter(n => n)
-            req.data.links = filterDuplicateLink(od.links, req.data.links)
+            filterData(od, req.data)
 
-            od.nodes.push(...req.data.nodes)
-            od.links.push(...req.data.links)
-            Graph.graphData(od)
+            // req.data.links = filterDuplicateLink(od.links, req.data.links)
+            // od.nodes.push(...req.data.nodes)
+            // od.links.push(...req.data.links)
+            // Graph.graphData(od)
         })
 
     })
@@ -73,13 +78,36 @@ axios.get(requestUrl).then(req => {
     let insideData = new Object()
     insideData = Object.assign(insideData, data)
     Graph.originData(insideData)
-    Graph.graphData(insideData)
+    updateGraph(data)
 })
 
+function updateGraph(data) {
+    // 设置边的曲率
+    let worker = new Worker('./setLinkCurvatureWorker.js')
+    console.log('requestUrl: ', requestUrl)
+    console.log('Graph: ', Graph)
+    worker.postMessage(data)
+    worker.onmessage = e => {
+        Graph.graphData(e.data)
+        worker.terminate()
+    }
+}
+
+function filterData(od, comming) {
+    let worker = new Worker('./filterWorker.js')
+    let data = {
+        od, comming
+    }
+    worker.postMessage({data})
+    worker.onmessage = e => {
+        updateGraph(e.data)
+        worker.terminate()
+    }
+}
 
 function filterDuplicateLink(odLinks, comingLinks) {
     for (let i = 0; i < comingLinks.length; i++) {
-        if(!comingLinks[i]){
+        if (!comingLinks[i]) {
             continue
         }
         let { source, target, type, properties, group } = comingLinks[i]
@@ -90,8 +118,8 @@ function filterDuplicateLink(odLinks, comingLinks) {
             properties: properties,
             group: group
         }
-        for (let j = 0 ; j < odLinks.length; j++) {
-            if(!odLinks[j]){
+        for (let j = 0; j < odLinks.length; j++) {
+            if (!odLinks[j]) {
                 continue
             }
             let { source, target, type, properties, group } = odLinks[j]
@@ -107,6 +135,4 @@ function filterDuplicateLink(odLinks, comingLinks) {
             }
         }
     }
-    let links = comingLinks.filter(l => l)
-    return links
 }

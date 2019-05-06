@@ -17,7 +17,7 @@ import getDagDepths from './dagDepths';
 
 
 import drawControl from './drawControl'
-import {setLinkCurvature} from './UtilFunc'
+import { setLinkCurvature } from './UtilFunc'
 
 //
 
@@ -156,6 +156,7 @@ export default Kapsule({
 		controlTools: { default: null, triggerUpdate: false },
 		// hover轮盘
 		hoverType: { default: null, triggerUpdate: false },
+		clickedNodeId: {default: null, triggerUpdate:false}
 	},
 
 	methods: {
@@ -194,7 +195,11 @@ export default Kapsule({
 							n.fixed = true
 						})
 					} else {
-						state.forceLayout.tick(); // Tick it
+						try {
+							state.forceLayout.tick(); // Tick it
+						} catch (e) {
+							console.log(e)
+						}
 						state.onEngineTick();
 					}
 				}
@@ -254,9 +259,8 @@ export default Kapsule({
 					}
 
 					/*节点处于点击状态时绘制轮盘*/
-					if (node.clicked) {
+					if (node.id == state.clickedNodeId) {
 						drawControl(state.ctx, node, state.controlTools, state.isShadow, state.hoverType)
-						state.changeClickNode = false
 					}
 				}
 				);
@@ -465,7 +469,7 @@ export default Kapsule({
 		forceLayout: d3ForceSimulation()
 			.force('link', d3ForceLink().distance(30))
 			.force('charge', d3ForceManyBody().strength(-1))
-			.force('forceManyBody', d3ForceManyBody().strength(-30).distanceMax(20))
+			// .force('forceManyBody', d3ForceManyBody().strength(-30).distanceMax(20))
 			// .force('center', d3ForceCenter())
 			// .force('radial', d3ForceRadial(200, window.innerWidth/2, window.innerHeight/2, 0))
 			.force('dagRadial', null)
@@ -532,7 +536,7 @@ export default Kapsule({
 				l.show = false
 			}
 		})
-		setLinkCurvature(state.graphData.links)
+		// setLinkCurvature(state.graphData.links)
 
 		// add links (if link force is still active)
 		const linkForce = state.forceLayout.force('link');
