@@ -1,4 +1,4 @@
-let requestUrl = 'http://localhost:8080/data/1/1000'
+let requestUrl = 'http://localhost:8080/data/1/5'
 // let requestUrl = 'http://localhost:8080/node/1304535'
 
 let graphInfo = { data: {} };
@@ -42,7 +42,6 @@ const Graph = ForceGraph()
             // req.data.links = filterDuplicateLink(od.links, req.data.links)
             // od.nodes.push(...req.data.nodes)
             // od.links.push(...req.data.links)
-            // updateGraph(od)
             // Graph.graphData(od)
         })
 
@@ -75,7 +74,7 @@ axios.get(requestUrl).then(req => {
     let insideData = new Object()
     insideData = Object.assign(insideData, data)
     Graph.originData(insideData)
-    // Graph.graphData(insideData)
+    Graph.graphData(insideData)
     updateGraph(data)
 })
 
