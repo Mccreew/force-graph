@@ -17,7 +17,7 @@ import getDagDepths from './dagDepths';
 
 
 import drawControl from './drawControl'
-import {setLinkCurvature} from './UtilFunc'
+import { setLinkCurvature } from './UtilFunc'
 
 //
 
@@ -194,7 +194,11 @@ export default Kapsule({
 							n.fixed = true
 						})
 					} else {
-						state.forceLayout.tick(); // Tick it
+						try {
+							state.forceLayout.tick(); // Tick it
+						} catch (e) {
+							console.log(e)
+						}
 						state.onEngineTick();
 					}
 				}
@@ -532,7 +536,7 @@ export default Kapsule({
 				l.show = false
 			}
 		})
-		setLinkCurvature(state.graphData.links)
+		// setLinkCurvature(state.graphData.links)
 
 		// add links (if link force is still active)
 		const linkForce = state.forceLayout.force('link');

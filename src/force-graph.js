@@ -118,7 +118,7 @@ function clearCanvas(ctx, width, height) {
 
 /**
  * 点击轮盘
- * @param {*} state 
+ * @param {*} state
  * @param {*} d state.hoverObj.d
  * @param {*} od origin data
  * @param {*} clickedNode 点击的节点
@@ -186,7 +186,7 @@ export default Kapsule({
 
 				if (d.nodes.length || d.links.length) {
 					console.info('force-graph loading', d.nodes.length + ' nodes', d.links.length + ' links');
-					
+
 					setNodePropertyMsg(d.nodes, state.ctx)
 
 					/*自动增加颜色*/
@@ -222,6 +222,7 @@ export default Kapsule({
 				[{ type: 'Node', objs: d.nodes }, { type: 'Link', objs: d.links }].forEach(hexIndex);
 				state.forceGraph.graphData(d);
 				state.shadowGraph.graphData(d);
+				console.log('state.colorTracker: ', state.colorTracker)
 
 				function hexIndex({ type, objs }) {
 					objs
