@@ -1,5 +1,3 @@
-import { link } from 'fs';
-
 import * as _ from "lodash/lang";
 
 /**
@@ -119,10 +117,51 @@ function setLinkCurvature(links) {
   return links
 }
 
+/**
+ * 设置node的propertyMsg
+ * @param {*} nodes
+ * @param {*} canvasCtx
+ */
+function setNodePropertyMsg(nodes, canvasCtx) {
+    canvasCtx.save()
+    canvasCtx.font = '2px serif'
+
+    let maxWidth = 6
+    nodes.forEach(n => {
+        if (n.propertyMsg) {
+            return
+        }
+        let msg = n.properties.name
+
+        if (canvasCtx.measureText(msg).width > maxWidth) {
+            let i = msg.length - 1
+            while (canvasCtx.measureText(msg).width > maxWidth && i > 0) {
+                msg = msg.slice(0, i)
+                i--
+            }
+            msg += '...'
+        }
+        n.propertyMsg = msg
+
+        n.textWidth = canvasCtx.measureText(n.propertyMsg).width
+    })
+    canvasCtx.restore()
+}
+
+function findNodeById(id, nodes, callback){
+    let worker = new Worker('./findNodeByIdWorker.js')
+    worker.postMessage({id, nodes})
+    worker.onmessage = (e) => {
+        // e.data = 对应id所在nodes的索引
+        callback(nodes[e.data])
+        worker.terminate()
+    }
+}
+
 export {
     getLinkCount,
     hasAnotherLink,
     setLinkCurvature,
     setNodePropertyMsg,
-    filterDuplicateLink
+    findNodeById
 }
