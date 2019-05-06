@@ -11,7 +11,7 @@ import CanvasForceGraph from './canvas-force-graph';
 import linkKapsule from './kapsule-link.js';
 import { stat } from 'fs';
 import { schemePaired } from 'd3-scale-chromatic';
-import { hasAnotherLink, setLinkCurvature, setNodePropertyMsg, filterDuplicateLink } from './UtilFunc'
+import { hasAnotherLink, setNodePropertyMsg, findNodeById } from './UtilFunc'
 
 const HOVER_CANVAS_THROTTLE_DELAY = 800; // ms to throttle shadow canvas updates for perf improvement
 const ZOOM2NODES_FACTOR = 4;
@@ -121,71 +121,74 @@ function clearCanvas(ctx, width, height) {
  * @param {*} state
  * @param {*} d state.hoverObj.d
  * @param {*} od origin data
- * @param {*} clickedNode 点击的节点
+ * @param {*} clickedNodeId 点击的节点id
  */
-function onControlCircleClick(state, d, od, clickedNode) {
-	/**
-	 * 当一个轮盘点击的时候，发起请求，获得与点击节点相联系的节点。
-	 * 在当前已有的节点中,也就是od.nodes,过滤掉有联系的下一层的节点，
-	 * 重新绘制画布
-	 */
-	if (d.type === 'firstCon') {
-		console.log('first clicked')
-		clickedNode.expand = false
+function onControlCircleClick(state, d, od, clickedNodeId) {
+	findNodeById(clickedNodeId, od.nodes, (clickedNode) => {
+		/**
+			 * 当一个轮盘点击的时候，发起请求，获得与点击节点相联系的节点。
+			 * 在当前已有的节点中,也就是od.nodes,过滤掉有联系的下一层的节点，
+			 * 重新绘制画布
+			 */
+		if (d.type === 'firstCon') {
+			console.log('first clicked')
+			clickedNode.expand = false
 
-		axios.get('http://localhost:8080/child/' + clickedNode.id).then(req => {
-			let childNodeIds = []
-			// 拥有其他边的childNode
-			let moreLinkNodeIds = []
-			req.data.nodes.forEach(node => {
-				if (hasAnotherLink(node.id, od.links, clickedNode.id)) {
-					moreLinkNodeIds.push(node.id)
-					return
+			axios.get('http://localhost:8080/child/' + clickedNode.id).then(req => {
+				let childNodeIds = []
+				// 拥有其他边的childNode
+				let moreLinkNodeIds = []
+				req.data.nodes.forEach(node => {
+					if (hasAnotherLink(node.id, od.links, clickedNode.id)) {
+						moreLinkNodeIds.push(node.id)
+						return
+					}
+					childNodeIds.push(node.id)
+				})
+
+				// 删除单独的子节点
+				let newNodes = od.nodes.filter(n => childNodeIds.indexOf(n.id) == -1)
+				console.log('after filter nodes: ', newNodes)
+				// 删除与子节点联系的边
+				let newLinks = od.links.filter(l => childNodeIds.indexOf(l.source.id) == -1 && childNodeIds.indexOf(l.target.id) == -1)
+				console.log('after filter links: ', newLinks)
+				// 删除有其他联系的子节点的边
+				// newLinks = newLinks.filter(l => moreLinkNodeIds.indexOf(l.target.id) == -1 || l.source.id != clickedNode.id)
+				for (let i = 0; i < newLinks.length; i++) {
+					if (moreLinkNodeIds.indexOf(newLinks[i].target.id) != -1 && newLinks[i].source.id == clickedNode.id) {
+						delete newLinks[i]
+					}
 				}
-				childNodeIds.push(node.id)
+				newLinks = newLinks.filter(l => l)
+
+				od.nodes = newNodes
+				od.links = newLinks
+				state.forceGraph.graphData(od)
 			})
-
-			// 删除单独的子节点
-			let newNodes = od.nodes.filter(n => childNodeIds.indexOf(n.id) == -1)
-			console.log('after filter nodes: ', newNodes)
-			// 删除与子节点联系的边
-			let newLinks = od.links.filter(l => childNodeIds.indexOf(l.source.id) == -1 && childNodeIds.indexOf(l.target.id) == -1)
-			console.log('after filter links: ', newLinks)
-			// 删除有其他联系的子节点的边
-			// newLinks = newLinks.filter(l => moreLinkNodeIds.indexOf(l.target.id) == -1 || l.source.id != clickedNode.id)
-			for (let i = 0; i < newLinks.length; i++) {
-				if (moreLinkNodeIds.indexOf(newLinks[i].target.id) != -1 && newLinks[i].source.id == clickedNode.id) {
-					delete newLinks[i]
+		}
+		if (d.type === 'secondCon') {
+			console.log('second clicked')
+			od.nodes = od.nodes.filter(n => n.id != clickedNode.id)
+			od.links = od.links.filter(l => {
+				if (l.source.id == clickedNode.id || l.target.id == clickedNode.id) {
+					return false
 				}
-			}
-			newLinks = newLinks.filter(l => l)
-
-			od.nodes = newNodes
-			od.links = newLinks
+				return true
+			})
 			state.forceGraph.graphData(od)
-		})
-	}
-	if (d.type === 'secondCon') {
-		console.log('second clicked')
-		od.nodes = od.nodes.filter(n => n.id != clickedNode.id)
-		od.links = od.links.filter(l => {
-			if(l.source.id == clickedNode.id || l.target.id == clickedNode.id){
-				return false
-			}
-			return true
-		})
-		state.forceGraph.graphData(od)
-	}
-	if (d.type === 'thirdCon') {
-		console.log('third clicked')
-		clickedNode.fx = null
-		clickedNode.fy = null
-	}
+		}
+		if (d.type === 'thirdCon') {
+			console.log('third clicked')
+			clickedNode.fx = null
+			clickedNode.fy = null
+		}
+	})
+
 }
 
 export default Kapsule({
 	props: {
-		clickedNodeId: {default: null, triggerUpdate: false},
+		clickedNodeId: { default: null, triggerUpdate: false },
 		width: { default: window.innerWidth, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false },
 		height: { default: window.innerHeight, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false },
 		graphData: {
@@ -580,10 +583,10 @@ export default Kapsule({
 				}
 
 				if (state.hoverObj.type === 'ControlCircle') {
-					onControlCircleClick(state, state.hoverObj.d, state.graphData, state.clickedNode)
+					onControlCircleClick(state, state.hoverObj.d, state.graphData, state.clickedNodeId)
 				}
 
-				state[`on${state.hoverObj.type}Click`](state.hoverObj.d, state.graphData, state.clickedNode);
+				state[`on${state.hoverObj.type}Click`](state.hoverObj.d, state.graphData);
 			} else {
 				state.clickedNodeId = ''
 				state.forceGraph.clickedNodeId(state.clickedNodeId)
