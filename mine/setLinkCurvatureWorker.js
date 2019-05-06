@@ -1,8 +1,8 @@
 importScripts('./lodash.js')
 
-function setLinkCurvature(links) {
+function setLinkCurvature(data) {
   // 复制本地数组
-  let localLinks = [...links]
+  let localLinks = [...data.links]
   // 筛选出多个拥有同一source和target的边
   let multyLinks = []
 
@@ -48,21 +48,21 @@ function setLinkCurvature(links) {
       })
     }
   }
-  multyLinks.forEach(links => {
-    if (links.length % 2 == 0) {
-      links.forEach((l, i) => {
-        if (i < links.length / 2) {
-          l.curvature = (i + 1) * (1 / links.length)
+  multyLinks.forEach(linkArr => {
+    if (linkArr.length % 2 == 0) {
+      linkArr.forEach((l, i) => {
+        if (i < linkArr.length / 2) {
+          l.curvature = (i + 1) * (1 / linkArr.length)
         } else {
-          l.curvature = -(links.length - i) * (1 / links.length)
+          l.curvature = -(linkArr.length - i) * (1 / linkArr.length)
         }
       })
     } else {
-      links.forEach((l, i) => {
-        if (i < Math.floor(links.length / 2)) {
-          l.curvature = (i + 1) * (1 / (links.length - 1))
-        } else if (i > Math.floor(links.length / 2)) {
-          l.curvature = -(links.length - i) * (1 / (links.length - 1))
+      linkArr.forEach((l, i) => {
+        if (i < Math.floor(linkArr.length / 2)) {
+          l.curvature = (i + 1) * (1 / (linkArr.length - 1))
+        } else if (i > Math.floor(linkArr.length / 2)) {
+          l.curvature = -(linkArr.length - i) * (1 / (linkArr.length - 1))
         } else {
           l.curvature = 0
         }
@@ -70,10 +70,10 @@ function setLinkCurvature(links) {
     }
   })
 
-  return links
+  return data
 }
 
 this.addEventListener('message', e => {
-  let newLinks = setLinkCurvature(e.data)
-  postMessage(newLinks)
+  let newData = setLinkCurvature(e.data)
+  postMessage(newData)
 })

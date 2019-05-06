@@ -1,4 +1,4 @@
-let requestUrl = 'http://localhost:8080/data/1/5'
+let requestUrl = 'http://localhost:8080/data/1/1000'
 // let requestUrl = 'http://localhost:8080/node/1304535'
 
 let graphInfo = { data: {} };
@@ -37,15 +37,12 @@ const Graph = ForceGraph()
             })
 
             req.data.nodes = req.data.nodes.filter(n => n)
-            filterData(od.links, req.data.links, (newLinks) => {
-                od.nodes.push(...req.data.nodes)
-                od.links.push(...newLinks)
-                updateGraph(od)
-            })
-            // req.data.links = filterDuplicateLink(od.links, req.data.links)
+            filterData(od, req.data)
 
+            // req.data.links = filterDuplicateLink(od.links, req.data.links)
             // od.nodes.push(...req.data.nodes)
             // od.links.push(...req.data.links)
+            // updateGraph(od)
             // Graph.graphData(od)
         })
 
@@ -83,23 +80,26 @@ axios.get(requestUrl).then(req => {
 })
 
 function updateGraph(data) {
-    let worker = new Worker('./worker.js')
+    // 设置边的曲率
+    let worker = new Worker('./setLinkCurvatureWorker.js')
     console.log('requestUrl: ', requestUrl)
     console.log('Graph: ', Graph)
-    worker.postMessage(data.links)
+    worker.postMessage(data)
     worker.onmessage = e => {
-        data.links = e.data
-        Graph.graphData(data)
+        Graph.graphData(e.data)
         worker.terminate()
     }
 }
 
-function filterData(odLinks, commingLinks, callback) {
+function filterData(od, comming) {
     let worker = new Worker('./filterWorker.js')
-    worker.postMessage({ odLinks, commingLinks })
+    let data = {
+        od, comming
+    }
+    worker.postMessage({data})
     worker.onmessage = e => {
-        let newLinks = e.data
-        callback(newLinks)
+        updateGraph(e.data)
+        worker.terminate()
     }
 }
 

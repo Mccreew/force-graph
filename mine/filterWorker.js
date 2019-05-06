@@ -2,8 +2,12 @@ importScripts('./lodash.js')
 
 this.addEventListener('message', e => {
   // console.log('子线程收到了消息: ', e.data)
-  let newLinks = filterDuplicateLink(e.data.odLinks, e.data.commingLinks)
-  postMessage(newLinks)
+  let originData = e.data.data.od
+  let commingData = e.data.data.comming
+  let newLinks = filterDuplicateLink(originData.links, commingData.links)
+  originData.links.push(...newLinks)
+  originData.nodes.push(...commingData.nodes)
+  postMessage(originData)
 })
 
 /**
