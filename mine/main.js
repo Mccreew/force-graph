@@ -28,6 +28,10 @@ const Graph = ForceGraph()
         })
 
         axios.get('http://localhost:8080/child/' + n.id).then(req => {
+            if(req.data.nodes.length == 0 || req.data.links.length == 0){
+                return
+            }
+
             req.data.nodes.forEach((node, index) => {
                 if (nodeIdSet.has(node.id)) {
                     delete req.data.nodes[index]
