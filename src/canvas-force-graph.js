@@ -17,7 +17,7 @@ import getDagDepths from './dagDepths';
 
 
 import drawControl from './drawControl'
-import {setLinkCurvature} from './UtilFunc'
+import { setLinkCurvature } from './UtilFunc'
 
 //
 
@@ -156,6 +156,7 @@ export default Kapsule({
 		controlTools: { default: null, triggerUpdate: false },
 		// hover轮盘
 		hoverType: { default: null, triggerUpdate: false },
+		clickedNodeId: {default: null, triggerUpdate:false}
 	},
 
 	methods: {
@@ -194,7 +195,11 @@ export default Kapsule({
 							n.fixed = true
 						})
 					} else {
-						state.forceLayout.tick(); // Tick it
+						try {
+							state.forceLayout.tick(); // Tick it
+						} catch (e) {
+							console.log(e)
+						}
 						state.onEngineTick();
 					}
 				}
@@ -254,9 +259,8 @@ export default Kapsule({
 					}
 
 					/*节点处于点击状态时绘制轮盘*/
-					if (node.clicked) {
+					if (node.id == state.clickedNodeId) {
 						drawControl(state.ctx, node, state.controlTools, state.isShadow, state.hoverType)
-						state.changeClickNode = false
 					}
 				}
 				);

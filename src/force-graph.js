@@ -185,7 +185,7 @@ function onControlCircleClick(state, d, od, clickedNode) {
 
 export default Kapsule({
 	props: {
-		clickedNode: { default: null, triggerUpdate: false },
+		clickedNodeId: {default: null, triggerUpdate: false},
 		width: { default: window.innerWidth, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false },
 		height: { default: window.innerHeight, onChange: (_, state) => adjustCanvasSize(state), triggerUpdate: false },
 		graphData: {
@@ -194,7 +194,11 @@ export default Kapsule({
 
 				if (d.nodes.length || d.links.length) {
 					console.info('force-graph loading', d.nodes.length + ' nodes', d.links.length + ' links');
+<<<<<<< HEAD
 					setLinkCurvature(d.links)
+=======
+
+>>>>>>> iss-15
 					setNodePropertyMsg(d.nodes, state.ctx)
 
 					/*自动增加颜色*/
@@ -206,7 +210,7 @@ export default Kapsule({
 							n.show = true
 						}
 					})
-					d.links.forEach((l,index) => {
+					d.links.forEach((l, index) => {
 						if (!l.color) {
 							l.color = schemePaired[l.group % 12]
 						}
@@ -215,10 +219,10 @@ export default Kapsule({
 						}
 						l.index = index
 					})
-					if(state.invisiableColor){
+					if (state.invisiableColor) {
 						console.log('state.invisiableColor: ', state.invisiableColor)
 						d.nodes.forEach(n => {
-							if(state.invisiableColor.indexOf(n.color) != -1){
+							if (state.invisiableColor.indexOf(n.color) != -1) {
 								n.show = false
 							}
 						})
@@ -230,6 +234,7 @@ export default Kapsule({
 				[{ type: 'Node', objs: d.nodes }, { type: 'Link', objs: d.links }].forEach(hexIndex);
 				state.forceGraph.graphData(d);
 				state.shadowGraph.graphData(d);
+				console.log('state.colorTracker: ', state.colorTracker)
 
 				function hexIndex({ type, objs }) {
 					objs
@@ -572,18 +577,9 @@ export default Kapsule({
 					state.hoverObj.d.fx = state.hoverObj.d.x
 					state.hoverObj.d.fy = state.hoverObj.d.y
 
-					state.hoverObj.d.clicked = state.hoverObj.d.clicked ? false : true;
-					if (state.hoverObj.d.clicked) {
-						if (state.clickedNode) {
-							state.clickedNode.clicked = false
-						}
-						state.clickedNode = state.hoverObj.d;
-					} else if (state.clickedNode) {
-						state.clickedNode = null
-					}
-					/*每次点击都视为改变了node*/
-					state.forceGraph.changeClickNode(true)
-					state.shadowGraph.changeClickNode(true)
+					state.clickedNodeId = state.hoverObj.d.id
+					state.forceGraph.clickedNodeId(state.clickedNodeId)
+					state.shadowGraph.clickedNodeId(state.clickedNodeId)
 				}
 
 				if (state.hoverObj.type === 'ControlCircle') {
@@ -592,10 +588,9 @@ export default Kapsule({
 
 				state[`on${state.hoverObj.type}Click`](state.hoverObj.d, state.graphData, state.clickedNode);
 			} else {
-				if (state.clickedNode) {
-					state.clickedNode.clicked = false
-				}
-				state.clickedNode = null
+				state.clickedNodeId = ''
+				state.forceGraph.clickedNodeId(state.clickedNodeId)
+				state.shadowGraph.clickedNodeId(state.clickedNodeId)
 			}
 		}, false);
 
