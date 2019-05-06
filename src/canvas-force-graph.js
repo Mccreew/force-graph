@@ -469,7 +469,7 @@ export default Kapsule({
 		forceLayout: d3ForceSimulation()
 			.force('link', d3ForceLink().distance(30))
 			.force('charge', d3ForceManyBody().strength(-1))
-			.force('forceManyBody', d3ForceManyBody().strength(-30).distanceMax(20))
+			// .force('forceManyBody', d3ForceManyBody().strength(-30).distanceMax(20))
 			// .force('center', d3ForceCenter())
 			// .force('radial', d3ForceRadial(200, window.innerWidth/2, window.innerHeight/2, 0))
 			.force('dagRadial', null)

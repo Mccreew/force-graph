@@ -194,11 +194,8 @@ export default Kapsule({
 
 				if (d.nodes.length || d.links.length) {
 					console.info('force-graph loading', d.nodes.length + ' nodes', d.links.length + ' links');
-<<<<<<< HEAD
-					setLinkCurvature(d.links)
-=======
 
->>>>>>> iss-15
+					// setLinkCurvature(d.links)
 					setNodePropertyMsg(d.nodes, state.ctx)
 
 					/*自动增加颜色*/
