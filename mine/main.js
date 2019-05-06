@@ -1,4 +1,4 @@
-let requestUrl = 'http://localhost:8080/data/1'
+let requestUrl = 'http://localhost:8080/data/1/5'
 // let requestUrl = 'http://localhost:8080/node/1304535'
 
 let graphInfo = { data: {} };

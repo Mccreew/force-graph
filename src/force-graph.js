@@ -118,7 +118,7 @@ function clearCanvas(ctx, width, height) {
 
 /**
  * 点击轮盘
- * @param {*} state 
+ * @param {*} state
  * @param {*} d state.hoverObj.d
  * @param {*} od origin data
  * @param {*} clickedNode 点击的节点
@@ -167,6 +167,14 @@ function onControlCircleClick(state, d, od, clickedNode) {
 	}
 	if (d.type === 'secondCon') {
 		console.log('second clicked')
+		od.nodes = od.nodes.filter(n => n.id != clickedNode.id)
+		od.links = od.links.filter(l => {
+			if(l.source.id == clickedNode.id || l.target.id == clickedNode.id){
+				return false
+			}
+			return true
+		})
+		state.forceGraph.graphData(od)
 	}
 	if (d.type === 'thirdCon') {
 		console.log('third clicked')
