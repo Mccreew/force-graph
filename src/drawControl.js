@@ -18,7 +18,7 @@ export default function (ctx, centerCircle, controlTools, isShadowCanvas, hoverT
 	let outCircle = {}
 	outCircle = Object.assign(outCircle, contrCle)
 	outCircle.radius = centerCircle.radius * 2 + 1
-	
+
 
 	for (let i = 0; i < 3; i++) {
 		let shadowColor = null
@@ -65,6 +65,7 @@ function drawContrCircle(ctx, centerCle, shadowColor, outCircle, isHover) {
 	outCircle.ldPointY = endPosition.ey
 
 
+
 	ctx.beginPath()
 	ctx.arc(outCircle.x, outCircle.y, outCircle.radius, outCircle.startAngle, outCircle.endAngle)
 	ctx.lineTo(outCircle.ldPointX, outCircle.ldPointY)
@@ -73,6 +74,14 @@ function drawContrCircle(ctx, centerCle, shadowColor, outCircle, isHover) {
 	ctx.closePath()
 	ctx.fill()
 	ctx.restore()
+	// 绘制icon
+	let img = new Image()
+	img.onload = () => {
+		ctx.drawImage(img, outCircle.x, outCircle.y)
+		console.log('绘制icon finish')
+	}
+	img.src = './icon/Selection_065.png'
+
 }
 
 // 求终点坐标
