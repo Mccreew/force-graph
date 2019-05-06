@@ -28,24 +28,12 @@ const Graph = ForceGraph()
         })
 
         axios.get('http://localhost:8080/child/' + n.id).then(req => {
-
-            // req.data.links = filterDuplicateLink(od.links, req.data.links)
-
-            filterDuplicateLinkWorker(od.links, req.data.links, function updateGraph(newLink){
-                console.log(newLink)
-                req.data.nodes.forEach((node, index) => {
-                    if (nodeIdSet.has(node.id)) {
-                        delete req.data.nodes[index]
-                    } else {
-                        nodeIdSet.add(node.id)
-                    }
-                })
-
-                req.data.nodes = req.data.nodes.filter(n => n)
-                od.nodes.push(...req.data.nodes)
-                od.links.push(...newLink)
-                updateGraphAfterSetLinkCurvature(od)
-                // Graph.graphData(od)
+            req.data.nodes.forEach((node, index) => {
+                if (nodeIdSet.has(node.id)) {
+                    delete req.data.nodes[index]
+                } else {
+                    nodeIdSet.add(node.id)
+                }
             })
 
             req.data.nodes = req.data.nodes.filter(n => n)
@@ -86,7 +74,6 @@ axios.get(requestUrl).then(req => {
     let insideData = new Object()
     insideData = Object.assign(insideData, data)
     Graph.originData(insideData)
-    Graph.graphData(insideData)
     updateGraph(data)
 })
 
