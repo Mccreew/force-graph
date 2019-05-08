@@ -148,10 +148,8 @@ function onControlCircleClick(state, d, od, clickedNodeId) {
 
 				// 删除单独的子节点
 				let newNodes = od.nodes.filter(n => childNodeIds.indexOf(n.id) == -1)
-				console.log('after filter nodes: ', newNodes)
 				// 删除与子节点联系的边
 				let newLinks = od.links.filter(l => childNodeIds.indexOf(l.source.id) == -1 && childNodeIds.indexOf(l.target.id) == -1)
-				console.log('after filter links: ', newLinks)
 				// 删除有其他联系的子节点的边
 				// newLinks = newLinks.filter(l => moreLinkNodeIds.indexOf(l.target.id) == -1 || l.source.id != clickedNode.id)
 				for (let i = 0; i < newLinks.length; i++) {
@@ -220,7 +218,6 @@ export default Kapsule({
 						l.index = index
 					})
 					if (state.invisiableColor) {
-						console.log('state.invisiableColor: ', state.invisiableColor)
 						d.nodes.forEach(n => {
 							if (state.invisiableColor.indexOf(n.color) != -1) {
 								n.show = false
@@ -234,7 +231,6 @@ export default Kapsule({
 				[{ type: 'Node', objs: d.nodes }, { type: 'Link', objs: d.links }].forEach(hexIndex);
 				state.forceGraph.graphData(d);
 				state.shadowGraph.graphData(d);
-				console.log('state.colorTracker: ', state.colorTracker)
 
 				function hexIndex({ type, objs }) {
 					objs
@@ -302,7 +298,6 @@ export default Kapsule({
 			default: null,
 			triggerUpdate: false
 		},
-		// firstClick:{default:false, triggerUpdate: false},
 		...linkedProps
 	},
 
@@ -418,10 +413,7 @@ export default Kapsule({
 		/*同步canvas-force-graph的colorTracker*/
 		state.forceGraph.canvasColorTracker(state.colorTracker)
 		state.shadowGraph.canvasColorTracker(state.colorTracker)
-		// console.log('state.forceGraph: ', state.forceGraph)
-		// console.log('state.canvasColorTracker: ', state.canvasColorTracker)
 
-		// Container anchor for canvas and tooltip
 		const container = document.createElement('div');
 		container.style.position = 'relative';
 		container.style.padding = 0
@@ -568,9 +560,6 @@ export default Kapsule({
 		// Handle click events on nodes/links
 		container.addEventListener('click', ev => {
 			if (state.hoverObj) {
-				// if(state.hoverObj.type === 'ControlCircle'){
-				// console.log('tool: ', state.hoverObj.d)
-				// }
 				if (state.hoverObj.type === 'Node') {
 
 					// 点击固定节点

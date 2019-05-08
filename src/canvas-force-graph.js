@@ -17,42 +17,11 @@ import getDagDepths from './dagDepths';
 
 
 import drawControl from './drawControl'
-import { setLinkCurvature } from './UtilFunc'
 
 //
 
 const DAG_LEVEL_NODE_RATIO = 2;
 
-function removeNode(node, state) {
-	let { nodes, links } = state.graphData
-	// console.log('delete node: ', node)
-	// links = links.filter(l => l.source.id !== node.id && l.target.id !== node.id); // Remove links attached to node
-	links.forEach((l, idx) => {
-		if (l.source === node || l.target === node) {
-			links.splice(idx, 1)
-			// console.log('delete link: ', l)
-		}
-	}
-	)
-	nodes.splice(node.id, 1)
-	nodes.forEach((n, idx) => {
-		n.id = idx;
-	});
-	// console.log('{nodes, links}: ', {nodes, links})
-	// state.refreshData({nodes, links})
-}
-
-
-// const myWorker = new Worker('/home/jw/WebstormProjects/force-graph/src/worker.js')
-
-function clearOutNode(state) {
-	let { nodes, links } = state.graphData
-	nodes.forEach(n => {
-		if (n.x && n.x > window.innerWidth / 2) {
-			removeNode(n, state)
-		}
-	})
-}
 
 
 export default Kapsule({
@@ -195,11 +164,7 @@ export default Kapsule({
 							n.fixed = true
 						})
 					} else {
-						try {
 							state.forceLayout.tick(); // Tick it
-						} catch (e) {
-							console.log(e)
-						}
 						state.onEngineTick();
 					}
 				}
@@ -527,7 +492,6 @@ export default Kapsule({
 		 * 			...
 		 * 			}
 		 * */
-
 		// 边的两个节点都可见，边才可见，否则show为false
 		state.graphData.links.forEach(l => {
 			if (l.source.show && l.target.show) {
@@ -536,7 +500,6 @@ export default Kapsule({
 				l.show = false
 			}
 		})
-		// setLinkCurvature(state.graphData.links)
 
 		// add links (if link force is still active)
 		const linkForce = state.forceLayout.force('link');

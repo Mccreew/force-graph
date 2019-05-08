@@ -38,13 +38,6 @@ function hasAnotherLink(nodeId, links, targetNodeId) {
  * @param {*} links
  */
 function setLinkCurvature(links) {
-    // let setLinkCurvatureWorker = new Worker('../src/setLinkCurvatureWorker.js')
-    // setLinkCurvatureWorker.postMessage(links)
-    // setLinkCurvatureWorker.onmessage = function (e) {
-    //     console.log('setLinkCurvature finish')
-    //     setLinkCurvatureWorker.terminate()
-    //     callback(e.data)
-    // }
     // 复制本地数组
   let localLinks = [...links]
   // 筛选出多个拥有同一source和target的边

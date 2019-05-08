@@ -1,5 +1,4 @@
 let requestUrl = 'http://localhost:8080/data/1/5'
-// let requestUrl = 'http://localhost:8080/node/1304535'
 
 let graphInfo = { data: {} };
 Object.defineProperty(graphInfo, 'data', {
@@ -13,7 +12,6 @@ Object.defineProperty(graphInfo, 'data', {
 })
 const Graph = ForceGraph()
     (document.getElementById('graph')).linkCurvature('curvature').width(1800).height(780)
-    // .linkDirectionalParticles(2))
     .onNodeClick((n, od) => {
         showHoverInfo(n)
         console.log(n)
@@ -42,11 +40,6 @@ const Graph = ForceGraph()
 
             req.data.nodes = req.data.nodes.filter(n => n)
             filterData(od, req.data)
-
-            // req.data.links = filterDuplicateLink(od.links, req.data.links)
-            // od.nodes.push(...req.data.nodes)
-            // od.links.push(...req.data.links)
-            // Graph.graphData(od)
         })
 
     })
@@ -56,13 +49,9 @@ const Graph = ForceGraph()
     })
     .linkDirectionalArrowLength(4)
     .onControlCircleClick((d, od, clickNode) => {
-
     })
     .onDataChange((data) => {
-        // let temp = {}
-        // Object.assign(temp, data)
         graphInfo.data = data
-        //    console.log(graphInfo)
     })
     .onNodeHover(n => {
         showHoverInfo(n)
@@ -84,8 +73,6 @@ axios.get(requestUrl).then(req => {
 function updateGraph(data) {
     // 设置边的曲率
     let worker = new Worker('./setLinkCurvatureWorker.js')
-    console.log('requestUrl: ', requestUrl)
-    console.log('Graph: ', Graph)
     worker.postMessage(data)
     worker.onmessage = e => {
         Graph.graphData(e.data)
@@ -102,37 +89,5 @@ function filterData(od, comming) {
     worker.onmessage = e => {
         updateGraph(e.data)
         worker.terminate()
-    }
-}
-
-function filterDuplicateLink(odLinks, comingLinks) {
-    for (let i = 0; i < comingLinks.length; i++) {
-        if (!comingLinks[i]) {
-            continue
-        }
-        let { source, target, type, properties, group } = comingLinks[i]
-        let base = {
-            source_id: typeof (source) == 'object' ? source.id : source,
-            target_id: typeof (target) == 'object' ? target.id : target,
-            type: type,
-            properties: properties,
-            group: group
-        }
-        for (let j = 0; j < odLinks.length; j++) {
-            if (!odLinks[j]) {
-                continue
-            }
-            let { source, target, type, properties, group } = odLinks[j]
-            let compare = {
-                source_id: typeof (source) == 'object' ? source.id : source,
-                target_id: typeof (target) == 'object' ? target.id : target,
-                type: type,
-                properties: properties,
-                group: group
-            }
-            if (_.isEqual(base, compare)) {
-                delete comingLinks[i]
-            }
-        }
     }
 }
