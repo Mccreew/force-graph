@@ -60,8 +60,6 @@ function ButtonVisual(graphData) {
     graphData_My = graphData
     // 筛选node和link类别
     filterNodeAndLinkType(graphData, categoryButton)
-    // categoryButton.nodeCategoryArr = nodeCategoryArr
-    // categoryButton.linkTypeArr = linkTypeArr
 }
 
 /**
