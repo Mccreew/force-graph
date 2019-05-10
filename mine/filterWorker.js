@@ -4,8 +4,9 @@ this.addEventListener('message', e => {
   let originData = e.data.data.od
   let commingData = e.data.data.comming
   let newLinks = filterDuplicateLink(originData.links, commingData.links)
+  let newNodes = filterDuplicateNode(commingData.nodes, originData)
   originData.links.push(...newLinks)
-  originData.nodes.push(...commingData.nodes)
+  originData.nodes.push(...newNodes)
   postMessage(originData)
 })
 
@@ -46,4 +47,28 @@ function filterDuplicateLink(odLinks, comingLinks) {
   }
   let links = comingLinks.filter(l => l)
   return links
+}
+
+/**
+ * 过滤重复的node
+ */
+function filterDuplicateNode(nodes, od) {
+  let nodeIdSet = new Set()
+  // node id 和其在originData中对应的索引位置
+  let nodeIdAndIndex = []
+
+  od.nodes.forEach(node => {
+    nodeIdSet.add(node.id)
+
+  })
+  nodes.forEach((node, index) => {
+    if (nodeIdSet.has(node.id)) {
+      delete nodes[index]
+    } else {
+      nodeIdSet.add(node.id)
+    }
+  })
+
+  nodes = nodes.filter(n => n)
+  return nodes
 }
