@@ -4,12 +4,6 @@
         body {
             margin: 0;
         }
-
-        /* div{
-			width: 500px;
-			height: 500px;
-			border: solid 1px blueviolet
-		} */
     </style>
 
     <!-- semantic ui -->
@@ -26,23 +20,35 @@
 </head>
 
 <body>
-    <div style="height:50px; margin-left: 52.5; margin-top: 3px;" id="categoryButton">
-        <div>
-            <a class="ui large label" @click='nodeButtonClick(item)' v-for='(item, index) in nodeCategoryArr'
-                :style="{'background-color':item.show ? item.color+'!important' : '', 'border-color':item.show ? item.color+'!important' : '', color:'white!important'}">
-                {{item.category}}
-            </a>
-        </div>
+    <div style="height:50px; margin-left: 52.5; margin-top: 3px;">
+        <div id="categoryButton">
+            <div>
+                <a class="ui large label" @click='nodeButtonClick(item)' v-for='(item, index) in nodeCategoryArr'
+                    :style="{'background-color':item.show ? item.color+'!important' : '', 'border-color':item.show ? item.color+'!important' : '', color:'white!important'}">
+                    {{item.category}}
+                </a>
+            </div>
 
-        <div style="margin-top: 3px;">
-            <a class="ui basic label"
-                style="pointer-events: none;"
-                :style="{'border-color':item.show ? item.color+'!important' : '', color:item.show ? item.color+'!important' : '' }"
-                v-for='(item, index) in linkTypeArr' @click='linkButtonClick(item)'> {{item.type}}</a>
+            <div style="margin-top: 3px;">
+                <a class="ui basic label" style="pointer-events: none;"
+                    :style="{'border-color':item.show ? item.color+'!important' : '', color:item.show ? item.color+'!important' : '' }"
+                    v-for='(item, index) in linkTypeArr' @click='linkButtonClick(item)'> {{item.type}}</a>
+            </div>
         </div>
-        <!-- <div style="margin-right:20;position: absolute;"> -->
-
-        <!-- </div> -->
+        <div class="ui search" :class='queryFinish ? "" : "loading"'
+            style="position: absolute;right: 55px;top: 20px;width: 700px;" id="cypherQuery"
+            v-on:keyup.enter='excuteQuery'>
+            <div class="ui icon input" style="width:100%">
+                <input class="prompt" type="text" placeholder="Cypher query..." v-model='cypher'
+                    style="font-weight:bold; margin-right: 10px">
+                    <!-- <i class="search icon"></i> -->
+                <button class="ui circular icon button" @click='excuteQuery' :class='classObject'>
+                    <!-- <i class="icon" :class='queryFinish ? "search" : "sync"'></i> -->
+                    <i class="search icon"></i>
+                </button>
+            </div>
+            <div class="results"></div>
+        </div>
     </div>
 
     <div id="graph" style="width:1800px; height:780px;" class="ui card centered grid">
@@ -50,11 +56,11 @@
     </div>
     <div style="margin-left:52.5px; line-height: 20pt" id="hoverInfo" v-show='show'>
 
-            <a style="display:inline" class="ui label" :class="{basic: isLink ? 'basic' : ''}"
-                :style='styleObject'>{{type}}</a>
+        <a style="display:inline" class="ui label" :class="{basic: isLink ? 'basic' : ''}"
+            :style='styleObject'>{{type}}</a>
         <span>
-                <a class="ui label"> ID <div class="detail" style="color:black">{{id}}</div>
-                </a>
+            <a class="ui label"> ID <div class="detail" style="color:black">{{id}}</div>
+            </a>
             <span>
                 <span v-for='(v, k) in properties'>
                     <span style="font-weight: bold"> {{k}}</span>: <span style="color:#797D7F">{{v}}</span>

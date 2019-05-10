@@ -7,12 +7,12 @@ let categoryButton = new Vue({
         nodeCategoryArr: [],
         linkTypeArr: [],
     },
-    methods:{
-        nodeButtonClick(item){
+    methods: {
+        nodeButtonClick(item) {
             item.show = !item.show
             changeNodeVisual(item, this.nodeCategoryArr)
         },
-        linkButtonClick(item){
+        linkButtonClick(item) {
             item.show = !item.show
         }
     }
@@ -20,31 +20,93 @@ let categoryButton = new Vue({
 
 // 显示hover信息
 let hoverInfo = new Vue({
-    el:'#hoverInfo',
-    data:{
-        type:'',
-        properties:{},
-        id:'',
-        isLink:false,
-        color:'',
-        show:false
+    el: '#hoverInfo',
+    data: {
+        type: '',
+        properties: {},
+        id: '',
+        isLink: false,
+        color: '',
+        show: false
     },
-    computed:{
-        styleObject(){
+    computed: {
+        styleObject() {
             return {
-                'border-color':this.color + '!important',
-                'background-color':this.isLink ? '' : this.color + '!important',
-                color:this.isLink ? this.color + '!important' : 'white!important'
+                'border-color': this.color + '!important',
+                'background-color': this.isLink ? '' : this.color + '!important',
+                color: this.isLink ? this.color + '!important' : 'white!important'
             }
         }
     }
 })
 
-function showHoverInfo(data){
-    if(!data){
+// cyphey查询
+let cypherQuery = new Vue({
+    el: '#cypherQuery',
+    data: {
+        queryFinish: true,
+        cypher: '',
+        hasError: false,
+    },
+    computed: {
+        classObject: function () {
+            return {
+                loading: !this.queryFinish,
+                red: this.hasError
+            }
+        }
+    },
+    watch: {
+        cypher: function (v) {
+            if (v.length == 0) {
+                this.hasError = false
+            }
+        }
+    },
+    methods: {
+        excuteQuery() {
+            let _this = this
+            this.queryFinish = false
+            let body = { 'cypher': this.cypher }
+            axios.post('http://localhost:8080/excute', body).then(res => {
+                _this.queryFinish = true
+                console.log(res.data)
+                if (res.data.error) {
+                    console.log('error')
+                    _this.hasError = true
+                } else {
+                    let commingData = res.data
+                    if (commingData.nodes.length === 1) {
+                        commingData.nodes[0].focus = true
+                    }
+                    commingData.nodes.forEach(n => {
+                        n.newComming = true
+                    })
+                    let od = Graph.graphData()
+                    filterData(od, commingData, updateGraph, recoverHighLightNode)
+                }
+            })
+        }
+    }
+})
+
+function recoverHighLightNode() {
+    setTimeout(deleteHighLight, 5000)
+    function deleteHighLight() {
+        let od = Graph.graphData()
+        od.nodes.forEach(n => {
+            if (n.newComming) {
+                delete n.newComming
+            }
+        })
+    }
+}
+
+function showHoverInfo(data) {
+    if (!data) {
         return
     }
-    if(!hoverInfo.type){
+    if (!hoverInfo.type) {
         hoverInfo.show = false
     }
     hoverInfo.show = true
@@ -90,7 +152,7 @@ function filterNodeAndLinkType(graphData, vueInstance) {
             color: n.color,
             show: true
         }
-        if(newNodeCategorys.indexOf(o.category) == -1){
+        if (newNodeCategorys.indexOf(o.category) == -1) {
             newNodeCategorys.push(o.category)
             vueInstance.nodeCategoryArr.push(o)
         }
@@ -99,9 +161,9 @@ function filterNodeAndLinkType(graphData, vueInstance) {
         let o = {
             type: l.type,
             color: l.color,
-            show:true
+            show: true
         }
-        if(newLinkTypes.indexOf(o.type) == -1){
+        if (newLinkTypes.indexOf(o.type) == -1) {
             newLinkTypes.push(o.type)
             vueInstance.linkTypeArr.push(o)
         }
@@ -115,16 +177,18 @@ function filterNodeAndLinkType(graphData, vueInstance) {
  * @param {*} activeItem 点击改变的个体
  * @param {*} nodeCategoryArr node的类别
  */
-function changeNodeVisual(activeItem, nodeCategoryArr){
+function changeNodeVisual(activeItem, nodeCategoryArr) {
     graphData_My.nodes.map(n => {
-        if(n.color == activeItem.color){
+        if (n.color == activeItem.color) {
             n.show = activeItem.show
         }
     })
 
-    let invisiableColor = nodeCategoryArr.filter(nc => {if(!nc.show){
-        return nc.color
-    }})
+    let invisiableColor = nodeCategoryArr.filter(nc => {
+        if (!nc.show) {
+            return nc.color
+        }
+    })
     invisiableColor = invisiableColor.filter(i => i)
     invisiableColor = invisiableColor.map(i => i.color)
 
@@ -132,9 +196,9 @@ function changeNodeVisual(activeItem, nodeCategoryArr){
     // 内部来判断新添加进图的数据的可视状态。应该统一起来
     Graph.invisiableColor(invisiableColor)
     graphData_My.links.map(l => {
-        if(invisiableColor.indexOf(l.source.color) != -1 || invisiableColor.indexOf(l.target.color) != -1){
+        if (invisiableColor.indexOf(l.source.color) != -1 || invisiableColor.indexOf(l.target.color) != -1) {
             l.show = false
-        }else{
+        } else {
             l.show = true
         }
     })

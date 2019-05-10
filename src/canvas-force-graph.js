@@ -125,7 +125,9 @@ export default Kapsule({
 		controlTools: { default: null, triggerUpdate: false },
 		// hover轮盘
 		hoverType: { default: null, triggerUpdate: false },
-		clickedNodeId: {default: null, triggerUpdate:false}
+		clickedNodeId: { default: null, triggerUpdate: false },
+		focusNode: { default: null, triggerUpdate: false },
+		beginFocusNode: { default: {}, triggerUpdate: false }
 	},
 
 	methods: {
@@ -164,7 +166,7 @@ export default Kapsule({
 							n.fixed = true
 						})
 					} else {
-							state.forceLayout.tick(); // Tick it
+						state.forceLayout.tick(); // Tick it
 						state.onEngineTick();
 					}
 				}
@@ -219,6 +221,22 @@ export default Kapsule({
 						ctx.arc(node.x, node.y, r + 0.5, 0, Math.PI * 2, false)
 						ctx.strokeStyle = "#FF9800"
 						ctx.lineWidth = 0.5
+						ctx.stroke()
+						ctx.restore()
+					}
+
+					// 高亮查询结果
+					if (node.newComming) {
+						ctx.save()
+						ctx.beginPath()
+						ctx.arc(node.x, node.y, r + 0.5, Math.PI / 3, Math.PI * 5 / 3, true)
+						ctx.strokeStyle = "#FF002B"
+						ctx.lineWidth = 0.4
+						ctx.stroke()
+						ctx.beginPath()
+						ctx.arc(node.x, node.y, r + 0.5, Math.PI * 2 / 3, Math.PI * 4 / 3, false)
+						ctx.strokeStyle = "#FF002B"
+						ctx.lineWidth = 0.4
 						ctx.stroke()
 						ctx.restore()
 					}
@@ -500,6 +518,11 @@ export default Kapsule({
 				l.show = false
 			}
 		})
+
+		if (state.focusNode) {
+			state.beginFocusNode(state.focusNode)
+			state.focusNode = null
+		}
 
 		// add links (if link force is still active)
 		const linkForce = state.forceLayout.force('link');
