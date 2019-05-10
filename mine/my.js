@@ -56,9 +56,9 @@ let cypherQuery = new Vue({
             }
         }
     },
-    watch:{
+    watch: {
         cypher: function (v) {
-            if(v.length == 0){
+            if (v.length == 0) {
                 this.hasError = false
             }
         }
@@ -75,12 +75,32 @@ let cypherQuery = new Vue({
                     console.log('error')
                     _this.hasError = true
                 } else {
-                    console.log(res.data)
+                    let commingData = res.data
+                    if (commingData.nodes.length === 1) {
+                        commingData.nodes[0].focus = true
+                    }
+                    commingData.nodes.forEach(n => {
+                        n.newComming = true
+                    })
+                    let od = Graph.graphData()
+                    filterData(od, commingData, updateGraph, recoverHighLightNode)
                 }
             })
         }
     }
 })
+
+function recoverHighLightNode() {
+    setTimeout(deleteHighLight, 5000)
+    function deleteHighLight() {
+        let od = Graph.graphData()
+        od.nodes.forEach(n => {
+            if (n.newComming) {
+                delete n.newComming
+            }
+        })
+    }
+}
 
 function showHoverInfo(data) {
     if (!data) {
