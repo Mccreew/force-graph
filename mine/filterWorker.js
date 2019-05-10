@@ -58,7 +58,7 @@ function filterDuplicateNode(nodes, od) {
   let nodeIdAndIndex = []
 
   od.nodes.forEach((node, idx) => {
-    if(nodeIdSet.has(node.id)){
+    if(!nodeIdSet.has(node.id)){
       nodeIdSet.add(node.id)
       nodeIdAndIndex.push({
         id:node.id,
