@@ -57,12 +57,21 @@ function filterDuplicateNode(nodes, od) {
   // node id 和其在originData中对应的索引位置
   let nodeIdAndIndex = []
 
-  od.nodes.forEach(node => {
-    nodeIdSet.add(node.id)
-
+  od.nodes.forEach((node, idx) => {
+    if(nodeIdSet.has(node.id)){
+      nodeIdSet.add(node.id)
+      nodeIdAndIndex.push({
+        id:node.id,
+        index:idx
+      })
+    }
   })
   nodes.forEach((node, index) => {
     if (nodeIdSet.has(node.id)) {
+      // 复制属性的值给已存在的node
+      let idxInOd = findIndexById(node.id, nodeIdAndIndex)
+      Object.assign(od.nodes[idxInOd], node)
+
       delete nodes[index]
     } else {
       nodeIdSet.add(node.id)
@@ -71,4 +80,18 @@ function filterDuplicateNode(nodes, od) {
 
   nodes = nodes.filter(n => n)
   return nodes
+}
+
+/**
+ * 根据id返回索引
+ * @param {*} id
+ * @param {*} arr [{id:..., index:...}]
+ */
+function findIndexById(id, arr){
+  for(let i = 0; i < arr.length; i++){
+    if(arr[i].id === id){
+      return arr[i].index
+    }
+  }
+  return null
 }
