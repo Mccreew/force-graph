@@ -29,17 +29,7 @@ const Graph = ForceGraph()
             if(req.data.nodes.length == 0 || req.data.links.length == 0){
                 return
             }
-
-            req.data.nodes.forEach((node, index) => {
-                if (nodeIdSet.has(node.id)) {
-                    delete req.data.nodes[index]
-                } else {
-                    nodeIdSet.add(node.id)
-                }
-            })
-
-            req.data.nodes = req.data.nodes.filter(n => n)
-            filterData(od, req.data)
+            filterData(od, req.data, updateGraph)
         })
 
     })
@@ -59,6 +49,10 @@ const Graph = ForceGraph()
     .onLinkHover(l => {
         showHoverInfo(l)
     })
+    .beginFocusNode(n => {
+        Graph.centerAt(n.x, n.y, 1000);
+        Graph.zoom(8, 2000);
+    })
 
 
 
@@ -70,24 +64,27 @@ axios.get(requestUrl).then(req => {
     updateGraph(data)
 })
 
-function updateGraph(data) {
+function updateGraph(data, afterUpFunc) {
     // 设置边的曲率
     let worker = new Worker('./setLinkCurvatureWorker.js')
     worker.postMessage(data)
     worker.onmessage = e => {
         Graph.graphData(e.data)
+        if(afterUpFunc){
+            afterUpFunc()
+        }
         worker.terminate()
     }
 }
 
-function filterData(od, comming) {
+function filterData(od, comming, upGraph, afterUpFunc) {
     let worker = new Worker('./filterWorker.js')
     let data = {
         od, comming
     }
     worker.postMessage({data})
     worker.onmessage = e => {
-        updateGraph(e.data)
+        upGraph(e.data, afterUpFunc)
         worker.terminate()
     }
 }

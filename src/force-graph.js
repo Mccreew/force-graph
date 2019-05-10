@@ -49,6 +49,8 @@ const linkedProps = Object.assign(
 		'onEngineStop',
 		'originData',
 		'canvasColorTracker',
+		'focusNode',
+		'beginFocusNode'
 	].map(p => ({ [p]: bindFG.linkProp(p) })),
 	...[
 		'nodeRelSize',
@@ -206,6 +208,10 @@ export default Kapsule({
 						}
 						if (!n.hasOwnProperty('show')) {
 							n.show = true
+						}
+						if(n.focus){
+							state.forceGraph.focusNode(n)
+							delete n.focus
 						}
 					})
 					d.links.forEach((l, index) => {
