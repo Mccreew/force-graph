@@ -1,5 +1,5 @@
 const pi = Math.PI
-let spaceAngle = pi / 100
+let spaceAngle = pi / 100 // 轮盘间隔角度大小
 
 let contrCle = {}
 // contrCle.radius = 100
@@ -8,10 +8,21 @@ contrCle.endAngle = pi * 3 / 2 + pi * 2 / 3
 contrCle.space = 0.3
 
 let controlType = {
-	'firstCon':0,
-	'secondCon':1,
-	'thirdCon':2
+	'firstCon': 0,
+	'secondCon': 1,
+	'thirdCon': 2
 }
+
+// 绘制icon
+const childNodeIcon = new Image()
+const unlockIcon = new Image()
+const deleteIcon = new Image()
+childNodeIcon.src = './icon/childNode.svg'
+deleteIcon.src = './icon/delete.svg'
+unlockIcon.src = './icon/unlock.svg'
+
+const icons = [childNodeIcon, deleteIcon, unlockIcon]
+
 
 // TODO tween.js提升绘制轮盘效果
 export default function (ctx, centerCircle, controlTools, isShadowCanvas, hoverType) {
@@ -28,35 +39,31 @@ export default function (ctx, centerCircle, controlTools, isShadowCanvas, hoverT
 			shadowColor = controlTools[i].__indexColor
 		}
 		if (i === 0) {
-			drawContrCircle(ctx, centerCircle, shadowColor, outCircle, isHover)
+			drawContrCircle(ctx, centerCircle, shadowColor, outCircle, isHover, i)
 			continue
 		}
 		let sAToEa = outCircle.endAngle - outCircle.startAngle;
 		outCircle.startAngle = outCircle.endAngle + spaceAngle;
 		outCircle.endAngle = outCircle.startAngle + sAToEa;
-		drawContrCircle(ctx, centerCircle, shadowColor, outCircle, isHover);
+		drawContrCircle(ctx, centerCircle, shadowColor, outCircle, isHover, i);
 	}
 }
 
-function drawContrCircle(ctx, centerCle, shadowColor, outCircle, isHover) {
+function drawContrCircle(ctx, centerCle, shadowColor, outCircle, isHover, iconIndex) {
 	ctx.save()
 
-
-	// ctx.fillStyle = 'rgb(' + (244 + i * 30) + ', ' + (208 + i * 20) + ', ' + (63 + i) +')'
-	// ctx.fillStyle = shadowColor ? shadowColor : '#808B96'
-	// ctx.fillStyle = isHover ? '#566573' : ctx.fillStyle
-	if(shadowColor){
+	if (shadowColor) {
 		ctx.fillStyle = shadowColor
-	}else if(isHover){
+	} else if (isHover) {
 		ctx.fillStyle = '#A4A4A4'
-	}else{
+	} else {
 		ctx.fillStyle = '#E6E6E6'
 	}
 
 	outCircle.x = centerCle.x
 	outCircle.y = centerCle.y
 
-	outCircle.insideRadius = centerCle.radius + outCircle.space
+	outCircle.insideRadius = centerCle.radius + outCircle.space // 内层半径
 	outCircle.ruPointX = outCircle.x + outCircle.radius * Math.cos(outCircle.startAngle)
 	outCircle.ruPointY = outCircle.y + outCircle.radius * Math.sin(outCircle.startAngle)
 
@@ -74,22 +81,66 @@ function drawContrCircle(ctx, centerCle, shadowColor, outCircle, isHover) {
 	ctx.closePath()
 	ctx.fill()
 	ctx.restore()
-	// 绘制icon
-	let img = new Image()
-	img.onload = () => {
-		ctx.drawImage(img, outCircle.x, outCircle.y)
-		console.log('绘制icon finish')
-	}
-	img.src = './icon/Selection_065.png'
 
+	if (!shadowColor) {
+		drawIcon(iconIndex, outCircle, ctx);
+	}
 }
 
-// 求终点坐标
+function drawIcon(iconIndex, outCircle, ctx) {
+	let icon = icons[iconIndex];
+	let drawSize = {
+		width: 4,
+		height: 4
+	};
+	let iconPosition = getIconPosition(outCircle, iconIndex, drawSize);
+	ctx.drawImage(icon, iconPosition.x, iconPosition.y, drawSize.width, drawSize.height);
+}
+
+/**
+ * 求终点坐标
+ * @param {*} contrCircle 控制轮盘
+ * @param {*} isInside 内层与否
+ */
 function getEndPosition(contrCircle, isInside = false) {
 	let arc = contrCircle.endAngle
 	let radius = isInside ? contrCircle.insideRadius : contrCircle.radius;
 	let ex = radius * Math.cos(arc) + contrCircle.x
 	let ey = radius * Math.sin(arc) + contrCircle.y
 
-	return {ex, ey}
+	return {
+		ex,
+		ey
+	}
+}
+
+/**
+ * 求对应控制轮盘的icon的坐标
+ * @param {*} outCircle 控制轮盘
+ * @param {*} iconIndex 图标索引
+ * @param {*} drawSize 绘制尺寸
+ */
+function getIconPosition(outCircle, iconIndex, drawSize) {
+	let line = outCircle.insideRadius
+	let angle = outCircle.startAngle + (outCircle.endAngle - outCircle.startAngle) / 2
+	let x = outCircle.x + line * Math.cos(angle)
+	let y = outCircle.y + line * Math.sin(angle)
+
+	if (iconIndex === 0) {
+		y -= drawSize.height / 2
+	}
+	if (iconIndex === 1) {
+		x -= drawSize.width / 2
+	}
+	if (iconIndex === 2) {
+		x -= drawSize.width
+		y -= drawSize.height / 2
+		// 微调图标
+		x -= 0.1
+	}
+
+	return {
+		x,
+		y
+	}
 }
