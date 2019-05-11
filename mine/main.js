@@ -11,7 +11,7 @@ Object.defineProperty(graphInfo, 'data', {
     }
 })
 const Graph = ForceGraph()
-    (document.getElementById('graph')).linkCurvature('curvature').width(1800).height(780)
+    (document.getElementById('graph')).linkCurvature('curvature').width(1800).height(780).backgroundColor('#ECF0F1')
     .onNodeClick((n, od) => {
         showHoverInfo(n)
         console.log(n)
