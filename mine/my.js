@@ -47,6 +47,8 @@ let cypherQuery = new Vue({
         queryFinish: true,
         cypher: '',
         hasError: false,
+        showList:true,
+        reqEmpty:false,
     },
     computed: {
         classObject: function () {
@@ -64,10 +66,14 @@ let cypherQuery = new Vue({
         }
     },
     methods: {
-        excuteQuery() {
+        excuteQuery(cypherString) {
+            if(cypherString.length < 1 || this.cypher.length < 1){
+                return
+            }
             let _this = this
             this.queryFinish = false
-            let body = { 'cypher': this.cypher }
+
+            let body = { 'cypher': cypherString ? cypherString : this.cypher  }
             axios.post('http://localhost:8080/excute', body).then(res => {
                 _this.queryFinish = true
                 console.log(res.data)
@@ -76,9 +82,15 @@ let cypherQuery = new Vue({
                     _this.hasError = true
                 } else {
                     let commingData = res.data
+                    if(commingData.nodes.length < 1){
+                        _this.hasError = true
+                        return
+                    }
                     if (commingData.nodes.length === 1) {
                         commingData.nodes[0].focus = true
                     }
+
+                    _this.hasError = false
                     commingData.nodes.forEach(n => {
                         n.newComming = true
                     })
@@ -86,6 +98,31 @@ let cypherQuery = new Vue({
                     filterData(od, commingData, updateGraph, recoverHighLightNode)
                 }
             })
+        },
+        showMoreInfo(){
+            // this.showList = !this.showList
+            // console.log(this.showList)
+            // this.showList = true
+        },
+        excuteItem(e){
+            if(this.cypher.length < 1){
+                return
+            }
+            let flag = e.target.id
+            let command = ''
+            if(flag === 'nodeId'){
+                command = `match (a) where id(a) = ${this.cypher} return a`
+            }
+            if(flag === 'nodeLabel'){
+                command = `match (a:\`${this.cypher}\`) return a limit 1`
+            }
+            if(flag === 'edgeId'){
+                command = `match (a)-[r]-(b) where id(r) = ${this.cypher} return a,r,b`
+            }
+            if(flag === 'edgeLabel'){
+                command = `match (a)-[r:\`${this.cypher}\`]-(b) return a,r,b limit 1`
+            }
+            this.excuteQuery(command)
         }
     }
 })
