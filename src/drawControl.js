@@ -57,7 +57,7 @@ function drawContrCircle(ctx, centerCle, shadowColor, outCircle, isHover, iconIn
 	} else if (isHover) {
 		ctx.fillStyle = '#A4A4A4'
 	} else {
-		ctx.fillStyle = '#E6E6E6'
+		ctx.fillStyle = '#DDDDDD'
 	}
 
 	outCircle.x = centerCle.x
@@ -128,6 +128,7 @@ function getIconPosition(outCircle, iconIndex, drawSize) {
 
 	if (iconIndex === 0) {
 		y -= drawSize.height / 2
+		x += 0.6
 	}
 	if (iconIndex === 1) {
 		x -= drawSize.width / 2
@@ -136,7 +137,7 @@ function getIconPosition(outCircle, iconIndex, drawSize) {
 		x -= drawSize.width
 		y -= drawSize.height / 2
 		// 微调图标
-		x -= 0.1
+		x -= 0.4
 	}
 
 	return {
