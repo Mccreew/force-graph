@@ -20,75 +20,52 @@
 </head>
 
 <body>
-    <div style="height:50px; margin-left: 52.5; margin-top: 3px;">
-        <div id="categoryButton" style="
-        margin-left: 29px;
-    ">
-            <div>
-                <a class="ui large label" @click='nodeButtonClick(item)' v-for='(item, index) in nodeCategoryArr'
-                    :style="{'background-color':item.show ? item.color+'!important' : '', 'border-color':item.show ? item.color+'!important' : '', color:'white!important'}">
-                    {{item.category}}
-                </a>
-            </div>
+    <div id="categoryButton" style="margin-left: 61px;position: absolute;z-index: 100;top: 107px;">
+        <div>
+            <a class="ui large label" @click='nodeButtonClick(item)' v-for='(item, index) in nodeCategoryArr'
+                :style="{'background-color':item.show ? item.color+'!important' : '', 'border-color':item.show ? item.color+'!important' : '', color:'white!important'}">
+                {{item.category}}
+            </a>
+        </div>
 
-            <div style="margin-top: 3px;">
-                <a class="ui basic label" style="pointer-events: none;"
-                    :style="{'border-color':item.show ? item.color+'!important' : '', color:item.show ? item.color+'!important' : '' }"
-                    v-for='(item, index) in linkTypeArr' @click='linkButtonClick(item)'> {{item.type}}</a>
+        <div style="margin-top: 3px;">
+            <a class="ui basic label" style="pointer-events: none;"
+                :style="{'border-color':item.show ? item.color+'!important' : '', color:item.show ? item.color+'!important' : '' }"
+                v-for='(item, index) in linkTypeArr' @click='linkButtonClick(item)'> {{item.type}}</a>
+        </div>
+    </div>
+    <div style="height:50px;margin-top: 101px;">
+        <div  id="expandSearch" style="margin-left: 54px;top: 58px;position: absolute;">
+            <div class="ui left labeled button" tabindex="0" v-for='(item, index) in expandItems'>
+                <a class="ui basic right pointing label">
+                   {{keyword}}
+                </a>
+                <div class="ui animated fade button" @click='runExpandSearch(index)' id="nodeId">
+                    <div class="visible content">{{item}}</div>
+                    <div class="hidden content">
+                        <i class="search icon"></i>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="ui search" :class='queryFinish ? "" : "loading"'
-            style="position: absolute;right: 55px;top: 20px;width: 700px;" id="cypherQuery"
+            style="position: absolute; top: 10px;left: 55px;width: 700px;" id="cypherQuery"
             v-on:keyup.enter='excuteQuery'>
             <div class="ui icon input" style="width:100%">
                 <input class="prompt" type="text" placeholder="Cypher query..." v-model='cypher'
-                    style="font-weight:bold; margin-right: 10px" @blur='showMoreInfo' @focus='showMoreInfo'>
+                    style="font-weight:bold; margin-right: 10px">
                 <!-- <i class="search icon"></i> -->
                 <button class="ui circular icon button" @click='excuteQuery' :class='classObject'>
                     <!-- <i class="icon" :class='queryFinish ? "search" : "sync"'></i> -->
                     <i class="search icon"></i>
                 </button>
             </div>
-
-            <div class="ui card" v-if='showList' style="position: absolute;z-index: 100;width: 91%;margin-top: 0px;margin-left: 10px;
-                box-shadow:rgb(212, 212, 213) 0px 3px 4px 0px, rgb(212, 212, 213) 0px 0px 0px 1px">
-                <div class="ui middle aligned selection list">
-                    <div id="nodeId" class="item" @click.capture='excuteItem($event)'>
-                        <div class="ui label" style="background-color:#395E66!important;
-                               border-color:#395E66!important;
-                               color:#fff!important">NODE <div class="detail">ID</div>
-                        </div>
-                        <span style="font-weight:bold">{{cypher}}</span>
-                    </div>
-                    <div id="nodeLabel" class="item" @click.capture='excuteItem($event)'>
-                        <div class="ui label" style="background-color:#369197!important;
-                               border-color:#369197!important;
-                               color:#fff!important">NODE <div class="detail">LABEL</div>
-                        </div>
-                        <span style="font-weight:bold">{{cypher}}</span>
-                    </div>
-                    <div id="edgeId" class="item" @click.capture='excuteItem($event)'>
-                        <div class="ui label" style="background-color:#EF5B5B!important;
-                               border-color:#EF5B5B!important;
-                               color:#fff!important">EDGE <div class="detail">ID</div>
-                        </div>
-                        <span style="font-weight:bold">{{cypher}}</span>
-                    </div>
-                    <div id="edgeLabel" class="item" @click.capture='excuteItem($event)'>
-                        <div class="ui label" style="background-color:#EAC435!important;
-                               border-color:#EAC435!important;
-                               color:#fff!important">EDGE <div class="detail">LABEL</div>
-                        </div>
-                        <span style="font-weight:bold">{{cypher}}</span>
-                    </div>
-                </div>
-            </div>
         </div>
 
-        <div id="graph" style="width:1800px; height:780px;" class="ui card centered grid">
+        <div id="graph" style="width:1800px; height:780px; margin-top: 5px;" class="ui card centered grid">
 
         </div>
-        <div style="margin-left:52.5px; line-height: 20pt" id="hoverInfo" v-show='show'>
+        <div style="margin-left: 54.5px;line-height: 20pt;" id="hoverInfo" v-show='show'>
 
             <a style="display:inline" class="ui label" :class="{basic: isLink ? 'basic' : ''}"
                 :style='styleObject'>{{type}}</a>

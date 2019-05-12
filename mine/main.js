@@ -51,7 +51,7 @@ const Graph = ForceGraph()
     })
     .beginFocusNode(n => {
         Graph.centerAt(n.x, n.y, 1000);
-        Graph.zoom(8, 2000);
+        Graph.zoom(8, 1000);
     })
 
 

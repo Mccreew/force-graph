@@ -40,6 +40,20 @@ let hoverInfo = new Vue({
     }
 })
 
+// 扩展查询
+let expandSearch = new Vue({
+    el:'#expandSearch',
+    data:{
+        keyword:'',
+        expandItems:['Node ID', 'Edge ID', 'Node Label', 'Edge Label']
+    },
+    methods:{
+        runExpandSearch(idx){
+            cypherQuery.excuteItem(idx)
+        }
+    }
+})
+
 // cyphey查询
 let cypherQuery = new Vue({
     el: '#cypherQuery',
@@ -47,8 +61,8 @@ let cypherQuery = new Vue({
         queryFinish: true,
         cypher: '',
         hasError: false,
-        showList:true,
         reqEmpty:false,
+        command:'',
     },
     computed: {
         classObject: function () {
@@ -63,17 +77,18 @@ let cypherQuery = new Vue({
             if (v.length == 0) {
                 this.hasError = false
             }
+            expandSearch.keyword = v
         }
     },
     methods: {
-        excuteQuery(cypherString) {
-            if(cypherString.length < 1 || this.cypher.length < 1){
+        excuteQuery() {
+            if(this.command.length < 1 && this.cypher.length < 1){
                 return
             }
             let _this = this
             this.queryFinish = false
 
-            let body = { 'cypher': cypherString ? cypherString : this.cypher  }
+            let body = { 'cypher': this.command ? this.command : this.cypher  }
             axios.post('http://localhost:8080/excute', body).then(res => {
                 _this.queryFinish = true
                 console.log(res.data)
@@ -99,33 +114,30 @@ let cypherQuery = new Vue({
                 }
             })
         },
-        showMoreInfo(){
-            // this.showList = !this.showList
-            // console.log(this.showList)
-            // this.showList = true
-        },
-        excuteItem(e){
+        excuteItem(idx){
             if(this.cypher.length < 1){
                 return
             }
-            let flag = e.target.id
-            let command = ''
-            if(flag === 'nodeId'){
-                command = `match (a) where id(a) = ${this.cypher} return a`
+            if(idx === 0){
+                this.command = `match (a) where id(a) = ${this.cypher} return a`
             }
-            if(flag === 'nodeLabel'){
-                command = `match (a:\`${this.cypher}\`) return a limit 1`
+            if(idx === 1){
+                this.command = `match (a)-[r]-(b) where id(r) = ${this.cypher} return a,r,b`
             }
-            if(flag === 'edgeId'){
-                command = `match (a)-[r]-(b) where id(r) = ${this.cypher} return a,r,b`
+            if(idx === 2){
+                this.command = `match (a:\`${this.cypher}\`) return a limit 10`
             }
-            if(flag === 'edgeLabel'){
-                command = `match (a)-[r:\`${this.cypher}\`]-(b) return a,r,b limit 1`
+            if(idx === 3){
+                this.command = `match (a)-[r:\`${this.cypher}\`]-(b) return a,r,b limit 10`
             }
-            this.excuteQuery(command)
-        }
+            this.excuteQuery()
+            this.command = ''
+        },
     }
 })
+
+
+
 
 function recoverHighLightNode() {
     setTimeout(deleteHighLight, 5000)
