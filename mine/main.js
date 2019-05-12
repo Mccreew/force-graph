@@ -1,4 +1,4 @@
-let requestUrl = 'http://localhost:8080/data/1/5'
+let requestUrl = 'http://localhost:8080/data/1/1000'
 
 let graphInfo = { data: {} };
 Object.defineProperty(graphInfo, 'data', {
@@ -8,6 +8,7 @@ Object.defineProperty(graphInfo, 'data', {
     set: function (value) {
         data = value
         ButtonVisual(data)
+        graphDetail.update(data)
     }
 })
 const Graph = ForceGraph()

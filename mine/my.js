@@ -1,5 +1,21 @@
 let graphData_My = {}
 
+
+// 图信息
+let graphDetail = new Vue({
+    el:'#graphDetail',
+    data:{
+        nodeCount:0,
+        linkCount:0
+    },
+    methods:{
+        update(data){
+            this.nodeCount = data.nodes.length
+            this.linkCount = data.links.length
+        }
+    }
+})
+
 // 类别按钮
 let categoryButton = new Vue({
     el: '#categoryButton',
