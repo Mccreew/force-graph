@@ -240,7 +240,7 @@ export default Kapsule({
 
 				function hexIndex({ type, objs }) {
 					objs
-						.filter(d => !d.hasOwnProperty('__indexColor') || d !== state.colorTracker.lookup(d.__indexColor))
+						.filter(d => !d.hasOwnProperty('__indexColor')  || d.__indexColor === null || d !== state.colorTracker.lookup(d.__indexColor))
 						.forEach(d => {
 							// store object lookup color
 							d.__indexColor = state.colorTracker.register({ type, d });
