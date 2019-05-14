@@ -73,7 +73,15 @@ function setLinkCurvature(data) {
   return data
 }
 
+function setMainCategoty(data){
+  data.nodes.forEach(n => {
+    if(!n.mainCategory){
+      n.mainCategory = n.categorys[0]
+    }
+  })
+}
 this.addEventListener('message', e => {
   let newData = setLinkCurvature(e.data)
+  setMainCategoty(newData)
   postMessage(newData)
 })

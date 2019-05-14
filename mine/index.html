@@ -38,7 +38,7 @@
         <div id="expandSearch" style="margin-left: 54px;top: 58px;position: absolute;">
             <div class="ui left labeled button" tabindex="0" v-for='(item, index) in expandItems'>
                 <a class="ui basic right pointing label">
-                    {{keyword}}
+                    <!-- {{keyword}} -->
                 </a>
                 <div class="ui animated fade button" @click='runExpandSearch(index)' id="nodeId">
                     <div class="visible content">{{item}}</div>
@@ -63,11 +63,11 @@
         </div>
 
         <div id="graphDetail">
-        <a class="ui teal right ribbon label" style="position: absolute;left: 1872px;z-index: 1000;top: 113px;">
-            {{nodeCount}} nodes</a>
+            <a class="ui teal right ribbon label" style="position: absolute;left: 1872px;z-index: 1000;top: 113px;">
+                {{nodeCount}} nodes</a>
 
-        <a class="ui orange right ribbon label" style="position: absolute;left: 1872px;z-index: 1000;top: 153px;">
-            {{linkCount}} links</a>
+            <a class="ui orange right ribbon label" style="position: absolute;left: 1872px;z-index: 1000;top: 153px;">
+                {{linkCount}} links</a>
         </div>
         <div id="graph" style="width:1800px; height:780px; margin-top: 5px;" class="ui card centered grid">
 

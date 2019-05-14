@@ -10,7 +10,7 @@ import ColorTracker from 'canvas-color-tracker';
 import CanvasForceGraph from './canvas-force-graph';
 import linkKapsule from './kapsule-link.js';
 import { stat } from 'fs';
-import { schemePaired } from 'd3-scale-chromatic';
+import { schemeCategory10 } from 'd3-scale-chromatic';
 import { hasAnotherLink, setNodePropertyMsg, findNodeById } from './UtilFunc'
 
 const HOVER_CANVAS_THROTTLE_DELAY = 800; // ms to throttle shadow canvas updates for perf improvement
@@ -50,7 +50,8 @@ const linkedProps = Object.assign(
 		'originData',
 		'canvasColorTracker',
 		'focusNode',
-		'beginFocusNode'
+		'beginFocusNode',
+		'focusResultMode'
 	].map(p => ({ [p]: bindFG.linkProp(p) })),
 	...[
 		'nodeRelSize',
@@ -204,7 +205,7 @@ export default Kapsule({
 					/*自动增加颜色*/
 					d.nodes.forEach(n => {
 						if (!n.color) {
-							n.color = schemePaired[n.group % 12]
+							n.color = schemeCategory10[n.group % 12]
 						}
 						if (!n.hasOwnProperty('show')) {
 							n.show = true
@@ -213,10 +214,11 @@ export default Kapsule({
 							state.forceGraph.focusNode(n)
 							delete n.focus
 						}
+
 					})
 					d.links.forEach((l, index) => {
 						if (!l.color) {
-							l.color = schemePaired[l.group % 12]
+							l.color = schemeCategory10[l.group % 12]
 						}
 						if (!l.hasOwnProperty('show')) {
 							l.show = true

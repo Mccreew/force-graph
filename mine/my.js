@@ -3,13 +3,13 @@ let graphData_My = {}
 
 // 图信息
 let graphDetail = new Vue({
-    el:'#graphDetail',
-    data:{
-        nodeCount:0,
-        linkCount:0
+    el: '#graphDetail',
+    data: {
+        nodeCount: 0,
+        linkCount: 0
     },
-    methods:{
-        update(data){
+    methods: {
+        update(data) {
             this.nodeCount = data.nodes.length
             this.linkCount = data.links.length
         }
@@ -58,13 +58,13 @@ let hoverInfo = new Vue({
 
 // 扩展查询
 let expandSearch = new Vue({
-    el:'#expandSearch',
-    data:{
-        keyword:'',
-        expandItems:['Node ID', 'Edge ID', 'Node Label', 'Edge Label']
+    el: '#expandSearch',
+    data: {
+        keyword: '',
+        expandItems: ['Node ID', 'Edge ID', 'Node Label', 'Edge Label', 'Node Property']
     },
-    methods:{
-        runExpandSearch(idx){
+    methods: {
+        runExpandSearch(idx) {
             cypherQuery.excuteItem(idx)
         }
     }
@@ -77,8 +77,8 @@ let cypherQuery = new Vue({
         queryFinish: true,
         cypher: '',
         hasError: false,
-        reqEmpty:false,
-        command:'',
+        reqEmpty: false,
+        command: '',
     },
     computed: {
         classObject: function () {
@@ -98,53 +98,43 @@ let cypherQuery = new Vue({
     },
     methods: {
         excuteQuery() {
-            if(this.command.length < 1 && this.cypher.length < 1){
+            if (this.command.length < 1 && this.cypher.length < 1) {
                 return
             }
             let _this = this
             this.queryFinish = false
 
-            let body = { 'cypher': this.command ? this.command : this.cypher  }
-            axios.post('http://localhost:8080/excute', body).then(res => {
-                _this.queryFinish = true
-                console.log(res.data)
-                if (res.data.error) {
-                    console.log('error')
-                    _this.hasError = true
-                } else {
-                    let commingData = res.data
-                    if(commingData.nodes.length < 1){
-                        _this.hasError = true
-                        return
-                    }
-                    if (commingData.nodes.length === 1) {
-                        commingData.nodes[0].focus = true
-                    }
-
-                    _this.hasError = false
-                    commingData.nodes.forEach(n => {
-                        n.newComming = true
-                    })
-                    let od = Graph.graphData()
-                    filterData(od, commingData, updateGraph, recoverHighLightNode)
-                }
-            })
+            let body = {
+                'cypher': this.command ? this.command : this.cypher
+            }
+            let url = 'http://localhost:8080/excute'
+            query(body, url, _this);
         },
-        excuteItem(idx){
-            if(this.cypher.length < 1){
+        excuteItem(idx) {
+            if (this.cypher.length < 1) {
                 return
             }
-            if(idx === 0){
+            if (idx === 0) {
                 this.command = `match (a) where id(a) = ${this.cypher} return a`
             }
-            if(idx === 1){
+            if (idx === 1) {
                 this.command = `match (a)-[r]-(b) where id(r) = ${this.cypher} return a,r,b`
             }
-            if(idx === 2){
+            if (idx === 2) {
                 this.command = `match (a:\`${this.cypher}\`) return a limit 10`
             }
-            if(idx === 3){
+            if (idx === 3) {
                 this.command = `match (a)-[r:\`${this.cypher}\`]-(b) return a,r,b limit 10`
+            }
+            if (idx === 4) {
+                if (this.cypher == '') {
+                    return
+                }
+                let body = {
+                    'keyword': this.cypher
+                }
+                query(body, 'http://localhost:8080/query', this)
+                return
             }
             this.excuteQuery()
             this.command = ''
@@ -155,8 +145,40 @@ let cypherQuery = new Vue({
 
 
 
+function query(body, url, _this) {
+    axios.post(url, body).then(res => {
+        _this.queryFinish = true;
+        console.log(res.data);
+        if (res.data.error) {
+            console.log('error');
+            _this.hasError = true;
+        } else {
+            let commingData = res.data;
+            if (commingData.nodes.length < 1) {
+                _this.hasError = true;
+                return;
+            }
+            if (commingData.nodes.length === 1) {
+                commingData.nodes[0].focus = true;
+            } else {
+                Graph.focusResultMode(true);
+            }
+            _this.hasError = false;
+            commingData.nodes.forEach(n => {
+                n.newComming = true;
+            });
+            let od = Graph.graphData();
+            filterData(od, commingData, updateGraph, recoverHighLightNode);
+        }
+    });
+}
+
 function recoverHighLightNode() {
-    setTimeout(deleteHighLight, 5000)
+    setTimeout(() => {
+        Graph.focusResultMode(false)
+    }, 3000)
+    setTimeout(deleteHighLight, 8000)
+
     function deleteHighLight() {
         let od = Graph.graphData()
         od.nodes.forEach(n => {
@@ -176,7 +198,7 @@ function showHoverInfo(data) {
     }
     hoverInfo.show = true
     hoverInfo.isLink = data.hasOwnProperty('type')
-    hoverInfo.type = data.type ? data.type : data.category
+    hoverInfo.type = data.type ? data.type : data.mainCategory
     hoverInfo.properties = {}
     Object.assign(hoverInfo.properties, data.properties)
     hoverInfo.id = data.id
@@ -209,16 +231,16 @@ function existObject(arr, object) {
  * @param {*} vueInstance
  */
 function filterNodeAndLinkType(graphData, vueInstance) {
-    let newNodeCategorys = vueInstance.nodeCategoryArr.map(n => n.category)
-    let newLinkTypes = vueInstance.linkTypeArr.map(l => l.type)
+    let currentNodeCategorys = vueInstance.nodeCategoryArr.map(n => n.category)
+    let currentLinkTypes = vueInstance.linkTypeArr.map(l => l.type)
     graphData.nodes.forEach(n => {
         let o = {
-            category: n.category,
+            category: n.categorys[0],
             color: n.color,
             show: true
         }
-        if (newNodeCategorys.indexOf(o.category) == -1) {
-            newNodeCategorys.push(o.category)
+        if (currentNodeCategorys.indexOf(o.category) == -1) {
+            currentNodeCategorys.push(o.category)
             vueInstance.nodeCategoryArr.push(o)
         }
     })
@@ -228,13 +250,13 @@ function filterNodeAndLinkType(graphData, vueInstance) {
             color: l.color,
             show: true
         }
-        if (newLinkTypes.indexOf(o.type) == -1) {
-            newLinkTypes.push(o.type)
+        if (currentLinkTypes.indexOf(o.type) == -1) {
+            currentLinkTypes.push(o.type)
             vueInstance.linkTypeArr.push(o)
         }
     })
 
-    return { newNodeCategorys, newLinkTypes }
+    // return { currentNodeCategorys, currentLinkTypes }
 }
 
 /**

@@ -1,8 +1,18 @@
 // let requestUrl = 'http://localhost:8080/data/1/1000'
-let requestUrl = 'http://localhost:8080/data/all'
+let requestUrl = 'http://localhost:8080/data/1000'
 
+// let getNodeCategoryUrl = 'http://localhost:8080/node/categorys'
 
-let graphInfo = { data: {} };
+// let categorys = []
+
+// // TODO 异步请求
+// axios.get(getNodeCategoryUrl).then(res => {
+//     categorys = res.data
+// })
+
+let graphInfo = {
+    data: {}
+};
 Object.defineProperty(graphInfo, 'data', {
     get: function () {
         return data
@@ -29,7 +39,7 @@ const Graph = ForceGraph()
         })
 
         axios.get('http://localhost:8080/child/' + n.id).then(req => {
-            if(req.data.nodes.length == 0 || req.data.links.length == 0){
+            if (req.data.nodes.length == 0 || req.data.links.length == 0) {
                 return
             }
             filterData(od, req.data, updateGraph)
@@ -41,8 +51,7 @@ const Graph = ForceGraph()
         showHoverInfo(l)
     })
     .linkDirectionalArrowLength(4)
-    .onControlCircleClick((d, od, clickNode) => {
-    })
+    .onControlCircleClick((d, od, clickNode) => {})
     .onDataChange((data) => {
         graphInfo.data = data
     })
@@ -53,8 +62,8 @@ const Graph = ForceGraph()
         showHoverInfo(l)
     })
     .beginFocusNode(n => {
-        Graph.centerAt(n.x, n.y, 3000);
-        Graph.zoom(8, 1000);
+        Graph.centerAt(n.x, n.y, 2000);
+        Graph.zoom(5, 1000);
     })
 
 
@@ -73,7 +82,7 @@ function updateGraph(data, afterUpFunc) {
     worker.postMessage(data)
     worker.onmessage = e => {
         Graph.graphData(e.data)
-        if(afterUpFunc){
+        if (afterUpFunc) {
             afterUpFunc()
         }
         worker.terminate()
@@ -83,9 +92,12 @@ function updateGraph(data, afterUpFunc) {
 function filterData(od, comming, upGraph, afterUpFunc) {
     let worker = new Worker('./filterWorker.js')
     let data = {
-        od, comming
+        od,
+        comming
     }
-    worker.postMessage({data})
+    worker.postMessage({
+        data
+    })
     worker.onmessage = e => {
         upGraph(e.data, afterUpFunc)
         worker.terminate()

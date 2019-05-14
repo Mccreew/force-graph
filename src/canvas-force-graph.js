@@ -127,7 +127,9 @@ export default Kapsule({
 		hoverType: { default: null, triggerUpdate: false },
 		clickedNodeId: { default: null, triggerUpdate: false },
 		focusNode: { default: null, triggerUpdate: false },
-		beginFocusNode: { default: {}, triggerUpdate: false }
+		beginFocusNode: { default: {}, triggerUpdate: false },
+		// 单独显示查询结果模式
+		focusResultMode:{default:false, triggerUpdate:false}
 	},
 
 	methods: {
@@ -195,6 +197,9 @@ export default Kapsule({
 					if (!node.show) {
 						return
 					}
+					if(state.focusResultMode && !node.newComming){
+						return
+					}
 
 
 					// Draw wider nodes by 1px on shadow canvas for more precise hovering (due to boundary anti-aliasing)
@@ -231,12 +236,12 @@ export default Kapsule({
 						ctx.beginPath()
 						ctx.arc(node.x, node.y, r + 0.5, Math.PI / 3, Math.PI * 5 / 3, true)
 						ctx.strokeStyle = "#FF002B"
-						ctx.lineWidth = 0.4
+						ctx.lineWidth = 0.8
 						ctx.stroke()
 						ctx.beginPath()
 						ctx.arc(node.x, node.y, r + 0.5, Math.PI * 2 / 3, Math.PI * 4 / 3, false)
 						ctx.strokeStyle = "#FF002B"
-						ctx.lineWidth = 0.4
+						ctx.lineWidth = 0.8
 						ctx.stroke()
 						ctx.restore()
 					}
@@ -286,6 +291,9 @@ export default Kapsule({
 
 
 							if (!link.show) {
+								return
+							}
+							if(state.focusResultMode && (!link.source.newComming || !link.target.newComming)){
 								return
 							}
 							if (!start.hasOwnProperty('x') || !end.hasOwnProperty('x')) return; // skip invalid link
@@ -345,6 +353,9 @@ export default Kapsule({
 				state.graphData.links.filter(getVisibility).forEach(link => {
 
 					if (!link.show) {
+						return
+					}
+					if(state.focusResultMode && (!link.source.newComming || !link.target.newComming)){
 						return
 					}
 
@@ -452,7 +463,7 @@ export default Kapsule({
 		forceLayout: d3ForceSimulation()
 			.force('link', d3ForceLink().distance(30))
 			.force('charge', d3ForceManyBody().strength(-1))
-			// .force('forceManyBody', d3ForceManyBody().strength(-30).distanceMax(20))
+			.force('forceManyBody', d3ForceManyBody().strength(-30).distanceMax(20))
 			// .force('center', d3ForceCenter())
 			// .force('radial', d3ForceRadial(200, window.innerWidth/2, window.innerHeight/2, 0))
 			.force('dagRadial', null)
