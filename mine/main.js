@@ -1,4 +1,6 @@
-let requestUrl = 'http://localhost:8080/data/1/1000'
+// let requestUrl = 'http://localhost:8080/data/1/1000'
+let requestUrl = 'http://localhost:8080/data/all'
+
 
 let graphInfo = { data: {} };
 Object.defineProperty(graphInfo, 'data', {
@@ -51,7 +53,7 @@ const Graph = ForceGraph()
         showHoverInfo(l)
     })
     .beginFocusNode(n => {
-        Graph.centerAt(n.x, n.y, 1000);
+        Graph.centerAt(n.x, n.y, 3000);
         Graph.zoom(8, 1000);
     })
 
