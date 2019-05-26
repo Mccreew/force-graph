@@ -176,7 +176,7 @@ function onControlCircleClick(state, d, od, clickedNodeId) {
 				}
 				return true
 			})
-			state.forceGraph.graphData(od)
+			state.onDataChange(od)
 		}
 		if (d.type === 'thirdCon') {
 			console.log('third clicked')
