@@ -163,10 +163,6 @@ export default Kapsule({
 					if (++state.cntTicks > state.cooldownTicks || (new Date()) - state.startTickTime > state.cooldownTime) {
 						state.engineRunning = false; // Stop ticking graph
 						state.onEngineStop();
-						/*布局结束后固定点的位置*/
-						state.graphData.nodes.forEach((n) => {
-							n.fixed = true
-						})
 					} else {
 						state.forceLayout.tick(); // Tick it
 						state.onEngineTick();
